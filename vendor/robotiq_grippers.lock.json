@@ -1,0 +1,7 @@
+{
+  "repository": "https://github.com/robotiq/grippers",
+  "commit": "068bc7b5192ea54f7c58b6577f499ce65e0b7644",
+  "sdk_version": "1.2.0",
+  "license": "BSD-3-Clause",
+  "integration": "GripperModbusClient on single dedicated worker; read-only diagnostic FC03"
+}

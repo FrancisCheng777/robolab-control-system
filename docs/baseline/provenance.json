@@ -1,0 +1,9 @@
+{
+  "source": "/home/heinrich/pi05_plug_demo",
+  "snapshot_date": "2026-10-31",
+  "active_bridge_pid": 323879,
+  "disk_binary_sha256": "8045bd0176f7673a19a7d56c83c60f3ea16e88db6ed08f87618e6e9f526465c4",
+  "running_binary_sha256": "8045bd0176f7673a19a7d56c83c60f3ea16e88db6ed08f87618e6e9f526465c4",
+  "original_source_modified": false,
+  "scope": "control, teleoperation, collection/export and hardware dependencies; no training/runtime weights/data"
+}

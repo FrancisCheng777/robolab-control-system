@@ -1,0 +1,70 @@
+{
+  "profile_kind": "initial_reference_not_calibrated",
+  "mount": "user-confirmed original Robotiq coupling, standard normal orientation",
+  "d405_installed": false,
+  "d405_mass_included": false,
+  "payload_for_empty_gripper_kg": 0,
+  "manual": {
+    "url": "https://assets.robotiq.com/website-assets/support_documents/document/2F-85_2F-140_General_PDF_20210623.pdf",
+    "page": 82,
+    "section": "5.2.3",
+    "mass_kg": 0.921,
+    "com_m": [
+      0,
+      0,
+      0.06
+    ],
+    "tcp_m": [
+      0,
+      0,
+      0.174
+    ],
+    "inertia_kg_m2_as_printed": [
+      0.00418,
+      0.00508,
+      0.00125
+    ],
+    "manual_inertia_used": false,
+    "reason": "The manual does not specify the inertia reference point required by Franka."
+  },
+  "inertia_estimate": {
+    "source": "https://github.com/robotiq/robotiq-ros/blob/f95169e1b085254e0a98159ca93bdd1aff7a681f/grippers/robotiq_description/urdf/robotiq_2f_85_macro.urdf.xacro",
+    "source_sha256": "be3a3b99b2d8f5ed58d4d57b70faaebad889913cd9e7c7f3bbc64ea7e158677e",
+    "pose": "fully open, all gripper joints at zero",
+    "method": "sum rotated component COM tensors with the parallel-axis theorem at aggregate COM",
+    "component_count": 9,
+    "component_model_mass_kg": 0.9208642730400001,
+    "component_model_com_in_urdf_base_m": [
+      -9.391513123046388e-06,
+      -4.2935509990398966e-05,
+      0.0474194011123513
+    ],
+    "inertia_kg_m2_column_major": [
+      0.001246129307683928,
+      4.0708636931121325e-06,
+      1.0819432075525335e-07,
+      4.0708636931121325e-06,
+      0.0020380811291540553,
+      2.5713638338891585e-06,
+      1.0819432075525335e-07,
+      2.5713638338891585e-06,
+      0.0011534243282603108
+    ],
+    "principal_moments_kg_m2": [
+      0.0011534167541637054,
+      0.0012461084801237646,
+      0.002038109530810823
+    ],
+    "limitation": "Vendor URDF estimate; not a measured inertia for this coupling/fingertip assembly. Manual mass/COM/TCP take precedence. No camera, camera bracket, workpiece or cable force is modeled."
+  },
+  "desk_import_spec": "https://download.franka.de/ride-cli-doc-v1.1.1/end_effector_commissioning.html",
+  "activated_in_desk": true,
+  "live_state_verified": true,
+  "motion_executed": true,
+  "desk_version": "4.2.2",
+  "actual_import_format": "plain endeffector-config.json through Other / Upload / Apply",
+  "live_verification_utc": "2026-10-29T11:50:33.600069+00:00",
+  "motion_report": "/home/heinrich/pi05_plug_demo/reports/initial_pose_check_20261029/status.json",
+  "geometric_collision_model": "Desk None; no calibrated Robotiq geometric collision envelope",
+  "d405_combined_profile_status": "Deferred: user has not determined bracket or camera mounting position; do not activate a camera-inclusive model before physical installation."
+}

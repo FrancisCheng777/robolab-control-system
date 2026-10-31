@@ -1,0 +1,179 @@
+{
+  "id": "robotiq-2f85-d405-printed-mount",
+  "status": "reference_profile_generated_not_applied_in_desk",
+  "updated_date_local": "2026-10-31",
+  "hardware_installation": {
+    "source": "user report 2026-10-31",
+    "robotiq_configured": true,
+    "d405_configured": true,
+    "d405_mounted": true,
+    "mount_type": "3d_printed"
+  },
+  "baseline_profile": "../robotiq_2f85_no_camera/endeffector-config.json",
+  "camera": {
+    "model": "Intel RealSense D405",
+    "last_verified_serial": "262622272972",
+    "serial_evidence": "../../reports/camera_integration_20261030.json",
+    "nominal_mass_kg": 0.06,
+    "nominal_dimensions_m": [
+      0.042,
+      0.042,
+      0.023
+    ],
+    "spec_source": "https://www.realsenseai.com/products/stereo-depth-camera-d405/",
+    "mass_is_measured": false
+  },
+  "original_coupling_and_fingertips_unchanged": true,
+  "combined_desk_parameters": {
+    "mass": 1.0098550544536928,
+    "centerOfMass": [
+      0.0,
+      -0.005963192692566201,
+      0.060715106723257514
+    ],
+    "inertia": [
+      0.0016574927175774829,
+      4.0708634797800805e-06,
+      1.0819434088880052e-07,
+      4.0708634797800805e-06,
+      0.0020676194844110466,
+      5.655140836009306e-05,
+      1.0819434088880052e-07,
+      5.655140836009306e-05,
+      0.0015629271379796583
+    ],
+    "transformation": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.174,
+      1.0
+    ]
+  },
+  "pending": [
+    "Desk activation and live readback; physical commissioning/calibration are not implied by generation"
+  ],
+  "live_readback": "../../reports/desk_tool_before_d405_20261031.json",
+  "desk_updated": false,
+  "mount": {
+    "name": "D405_wrist_mount_R2",
+    "matches_installed_part": true,
+    "sources": {
+      "D405_wrist_mount_R2_PRINT.stl": {
+        "path": "sources/D405_wrist_mount_R2_PRINT.stl",
+        "sha256": "9c350d21205a0faee85acca7afb5d60a310e1c03f1203e23c381fcc883bde388",
+        "matches_package_manifest": true,
+        "matches_github_manifest": true
+      },
+      "D405_wrist_mount_R2.step": {
+        "path": "sources/D405_wrist_mount_R2.step",
+        "sha256": "aa2665bdaa102aa09df4dc16294182dae56d95061f027cd0242e2934a4f40f2d",
+        "matches_package_manifest": true,
+        "matches_github_manifest": true
+      },
+      "build_mount.py": {
+        "path": "sources/build_mount.py",
+        "sha256": "a00b2e83d57bbb607b014881fa05035817702bfc6fc792d411d2fcec84f523cc",
+        "matches_package_manifest": true,
+        "matches_github_manifest": true
+      },
+      "mechanical_checks.json": {
+        "path": "sources/mechanical_checks.json",
+        "sha256": "ebb5ae6dede8aaafcabf0ad93cf45aed109f656eb2daec92ac33aa4a3a1b3ed1",
+        "matches_package_manifest": true,
+        "matches_github_manifest": true
+      }
+    },
+    "frame": "Robotiq vendor closed frame: Y toward tips, +Z camera side; not Franka flange frame",
+    "camera_front_center_in_design_frame_m": [
+      0,
+      0.07,
+      0.064
+    ],
+    "camera_pitch_deg": 30,
+    "solid_volume_m3": 2.1145770509497624e-05,
+    "mass_with_added_fasteners_kg": 0.028855054453692734,
+    "flange_T_design_column_major": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      -1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0112,
+      1.0
+    ],
+    "confirmation_source": "User confirmed R2 and provided the mount repository on 2026-10-31",
+    "repository": "https://github.com/sri299792458/robotiq-2f85-d405-mount",
+    "commit": "96941676e8112bccbda49420375acfa5d4c586e5",
+    "recommended_print_settings": {
+      "material": "PETG",
+      "layer_height_mm": 0.2,
+      "walls": 6,
+      "top_bottom_layers": 6,
+      "gyroid_infill_fraction": 0.4
+    },
+    "printed_part_mass_kg": 0.026855054453692732,
+    "added_fasteners_mass_kg": 0.002,
+    "mass_basis": {
+      "user_authorized_estimation": true,
+      "material_user_confirmed": "PETG",
+      "density_kg_m3": 1270,
+      "density_is_generic_reference_not_exact_brand": true,
+      "density_source": "https://prusament.com/wp-content/uploads/2022/10/PETG_Prusament_TDS_2021_10_EN.pdf",
+      "method": "full solid CAD volume times reference PETG density",
+      "not_measured": true,
+      "infill_correction_applied": false,
+      "note": "Solid-density reference; actual sliced print is normally lighter. This is not an exact 40% infill mass."
+    },
+    "fastener_mass_basis": "Engineering allowance: 2 g total for two added M3x8 screws and washers; existing gripper seat screws reused and not added twice. Not measured.",
+    "flange_registration_basis": "Prior standard unflipped mounting convention; stock fingers and R2 side mount corroborated by user photographs. Rx(+90deg) CAD-to-flange nominal mapping. Effective axial offset 11.2mm inferred from manual pages 65/82, not image metrology."
+  },
+  "finger_assembly": {
+    "status": "stock_Robotiq_fingers_confirmed",
+    "yellow_TPU_installed": false,
+    "confirmation": "User explicitly states no yellow TPU; installed front and side photos show stock fingers. Third image identifies the R2 camera bracket only."
+  },
+  "mass_estimate": {
+    "baseline_gripper_kg": 0.921,
+    "camera_nominal_kg": 0.06,
+    "solid_PETG_mount_kg": 0.026855054453692732,
+    "added_camera_fasteners_allowance_kg": 0.002,
+    "total_if_baseline_gripper_unchanged_kg": 1.0098550544536928,
+    "includes_fingertip_changes": false,
+    "includes_cable_forces": false
+  },
+  "photo_evidence": [
+    {
+      "path": "sources/installed-front.png",
+      "sha256": "2df1f230f9f00fa027612d09eeef42bbc972e6861fe3bc234a1037c547da1eaa"
+    },
+    {
+      "path": "sources/installed-side.png",
+      "sha256": "0d2943b4e1f0a51b485e9382a00a8c3527a9b974478179ab7cef733d9b640ab6"
+    },
+    {
+      "path": "sources/user-confirmed-R2.png",
+      "sha256": "0b8d6dd9d0b136083686cd0a7754927a302424b0d2523fa4d0f93c9add0af284"
+    }
+  ]
+}

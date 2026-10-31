@@ -1,0 +1,78 @@
+{
+  "status": "Printable prototype R2; physical fit and motion check required",
+  "camera_front_centre_world_mm": [
+    0,
+    70,
+    64
+  ],
+  "pitch_deg": 30.0,
+  "two_screw_interface": {
+    "axes": "Y",
+    "centres_XZ_mm": [
+      [
+        -6,
+        27
+      ],
+      [
+        6,
+        27
+      ]
+    ],
+    "mating_face_Y_mm": 36.3,
+    "through_diameter_mm": 4.5,
+    "counterbore_diameter_mm": 8,
+    "preserved_seat_missing_mm3": 0.0
+  },
+  "solid_count": 1,
+  "brep_valid": true,
+  "volume_mm3": 21145.770509497623,
+  "world_bounds_mm": [
+    [
+      -24.800000000000004,
+      33.351288694035716,
+      17.35
+    ],
+    [
+      24.800000000000004,
+      84.99807621135332,
+      99.47743001385408
+    ]
+  ],
+  "nominal_camera_overlap_mm3": 0.0,
+  "usb_plug_envelope_overlap_mm3": 0.0,
+  "camera_screw_insertion_mm": 2.5,
+  "camera_screws": "2 x M3x8 socket head, 0.5 mm plain washer",
+  "camera_cavity_spacing_mm": 43.6,
+  "front_guard_projection_mm": 3.0,
+  "front_insertion_sweep_overlap_mm3": 0.0,
+  "driver_access_overlaps_mm3": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "stl": {
+    "watertight": true,
+    "winding_consistent": true,
+    "connected_components": 1,
+    "volume_mm3": 21145.71216826209,
+    "bounds_mm": [
+      [
+        -24.799999237060547,
+        -57.250083923339844,
+        -1.0719326461346417e-14
+      ],
+      [
+        24.799999237060547,
+        24.799999237060547,
+        31.0
+      ]
+    ],
+    "dimensions_mm": [
+      49.599998474121094,
+      82.05008316040039,
+      31.00000000000001
+    ],
+    "triangles": 9970
+  }
+}

@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv*/
+build*/
+Testing/
+data/
+outputs/
+.env
+.env.*
+.DS_Store
+reports/**
+!reports/robolab_restore_20261030/
+!reports/robolab_restore_20261030/bridge.trial.json
+!reports/robolab_restore_20261030/collection.trial.json

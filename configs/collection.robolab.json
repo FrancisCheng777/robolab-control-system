@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "hardware_verified": false,
+  "task": "insert the plug into the power strip",
+  "control_hz": 15,
+  "socket": "/tmp/pi05-robolab.sock",
+  "gello_port": "/dev/serial/by-id/usb-FTDI_USB__-__Serial_Converter_FTBYPQ5E-if00-port0",
+  "arm_home": [
+    0.0,
+    -0.6283185307179586,
+    0.0,
+    -2.5132741228718345,
+    0.0,
+    1.8849555921538759,
+    0.0
+  ],
+  "gello_reference_joints_rad": [
+    0.0,
+    -0.6283185307179586,
+    0.0,
+    -2.5132741228718345,
+    0.0,
+    1.8849555921538759,
+    0.7853981633974483
+  ],
+  "cameras": {
+    "main_serial": "019337540647",
+    "wrist_serial": "262622272972",
+    "main_rotate_cw": true,
+    "main_crop_square": true
+  },
+  "teleop_controller": "robolab_torque",
+  "recording_action_source": "next_observed_joint_state",
+  "home_reference_velocity": 0.2,
+  "open_gripper_after_home": true
+}

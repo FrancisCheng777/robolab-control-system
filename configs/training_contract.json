@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "action_contract_id": "panda_delta_q0.03_robotiq_width0.085_v1",
+  "source_dataset": "LeRobot v3; train/ and validation/ split by collection session",
+  "dataset_adapter": "pi05_demo.training_data.ChunkDataset",
+  "control_hz": 15,
+  "state_dim": 9,
+  "action_dim": 8,
+  "model_action_dim": 32,
+  "action_horizon": 10,
+  "state_layout": "q[7] radians + measured Robotiq aperture/2 twice in metres",
+  "action_layout": "(q_target - measured_q)/0.03 per timestep; gripper=2*command_width/0.085-1",
+  "image_keys": [
+    "base_0_rgb",
+    "left_wrist_0_rgb",
+    "right_wrist_0_rgb"
+  ],
+  "image_mask": [
+    true,
+    true,
+    false
+  ],
+  "image_shape": [
+    224,
+    224,
+    3
+  ],
+  "normalization": "dataset_root/norm_stats.json; computed on train only",
+  "delta_actions_transform": false,
+  "droid_velocity_scaling": false,
+  "stage1_requirement": "SFT pi0.5 and train RL-token module; ordinary pi05_droid checkpoint is not sufficient",
+  "status": "RLinf Stage-1 entry integrated; CPU data/model/two-rank FSDP tests passed; full CUDA training pending",
+  "normalization_method": "quantile_q01_q99 with epsilon 1e-6; no silent clipping",
+  "state_tokenization": "normalize 9 real dimensions, tokenize, then pad state/actions to 32",
+  "learning_mode": "offline supervised Stage-1: pi0.5 actions + RL-token auxiliary objective",
+  "chunk_sampling": "complete_episode_windows_no_tail_padding",
+  "required_operator_labels": [
+    "success/failure/aborted outcome"
+  ],
+  "optional_operator_labels": [
+    "critical",
+    "intervention"
+  ],
+  "inference_time_rtc_requires_rtc_teleop_data": false
+}

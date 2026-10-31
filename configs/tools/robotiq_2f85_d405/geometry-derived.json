@@ -1,0 +1,70 @@
+{
+  "frame": "Robotiq vendor closed CAD frame; not Franka flange",
+  "mount": {
+    "volume_m3": 2.1145712168261993e-05,
+    "solid_centroid_m": [
+      -9.456111968466077e-11,
+      0.05064244508775871,
+      0.06268690626459772
+    ],
+    "solid_inertia_per_kg_m2_column_major": [
+      0.000723707716653108,
+      6.431092714439171e-13,
+      2.5799745296153436e-12,
+      6.431092714439171e-13,
+      0.0007410477400353034,
+      -0.00020868063469190118,
+      2.5799745296153436e-12,
+      -0.00020868063469190118,
+      0.0003415404659276351
+    ],
+    "printed_mass_kg": null,
+    "note": "Multiply unit-mass tensor by measured/estimated printed mass only as a uniform-density approximation. CAD volume times 40% is not the sliced volume."
+  },
+  "camera_envelope": {
+    "nominal_mass_kg": 0.06,
+    "geometric_center_m": [
+      0.0,
+      0.06004070785647896,
+      0.06975
+    ],
+    "uniform_box_inertia_kg_m2_column_major": [
+      1.1465e-05,
+      0.0,
+      0.0,
+      0.0,
+      1.609625e-05,
+      -2.6738534341844543e-06,
+      0.0,
+      -2.673853434184455e-06,
+      1.300875e-05
+    ],
+    "design_T_front_column_major": [
+      -1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.49999999999999994,
+      0.8660254037844387,
+      0.0,
+      0.0,
+      0.8660254037844387,
+      -0.49999999999999994,
+      0.0,
+      0.0,
+      0.07,
+      0.064,
+      1.0
+    ],
+    "note": "Geometric center and uniform box inertia are estimates, not vendor mass properties or hand-eye calibration."
+  },
+  "checks": {
+    "source_hash": true,
+    "volume_matches_release": true,
+    "bounds_match_STEP_report": true,
+    "proper_rotation": true,
+    "physical_solid_inertia": true
+  },
+  "desk_import_generated": false
+}

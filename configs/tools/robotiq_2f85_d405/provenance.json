@@ -1,0 +1,183 @@
+{
+  "profile_kind": "nominal_engineering_reference_not_load_identified",
+  "baseline_sha256": "8d1890004e898c7fda4a32f8f971317c2d7ac1bdc6c440cab3810fc7bdc20974",
+  "mount_repository_commit": "96941676e8112bccbda49420375acfa5d4c586e5",
+  "flange_T_design_column_major": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    -1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0112,
+    1.0
+  ],
+  "registration_basis": "Prior standard unflipped mounting convention; stock fingers and R2 side mount corroborated by user photographs. Rx(+90deg) CAD-to-flange nominal mapping. Effective axial offset 11.2mm inferred from manual pages 65/82, not image metrology.",
+  "registration_is_measured": false,
+  "camera_is_hand_eye_calibrated": false,
+  "components": [
+    {
+      "name": "stock_2f85_including_original_coupling_and_fingers",
+      "mass_kg": 0.921,
+      "center_in_flange_m": [
+        0.0,
+        0.0,
+        0.06
+      ],
+      "inertia_at_com_in_flange_kg_m2": [
+        [
+          0.001246129307683928,
+          4.0708636931121325e-06,
+          1.0819432075525335e-07
+        ],
+        [
+          4.0708636931121325e-06,
+          0.0020380811291540553,
+          2.5713638338891585e-06
+        ],
+        [
+          1.0819432075525335e-07,
+          2.5713638338891585e-06,
+          0.0011534243282603108
+        ]
+      ],
+      "basis": "Previous reference profile: manual mass/COM/TCP, vendor URDF open-gripper inertia estimate."
+    },
+    {
+      "name": "PETG_R2_mount",
+      "mass_kg": 0.026855054453692732,
+      "center_in_flange_m": [
+        -9.456111968466077e-11,
+        -0.06268690626459772,
+        0.06184244508775871
+      ],
+      "inertia_at_com_in_flange_kg_m2": [
+        [
+          1.9435210139276845e-05,
+          -6.928535648196034e-14,
+          1.7270734504301055e-14
+        ],
+        [
+          -6.928535648196034e-14,
+          9.172087810626229e-06,
+          5.604129808082167e-06
+        ],
+        [
+          1.7270734504301055e-14,
+          5.604129808082167e-06,
+          1.990087741143401e-05
+        ]
+      ],
+      "basis": "Full CAD solid at PETG reference density 1270 kg/m3; actual infill distribution not modeled."
+    },
+    {
+      "name": "D405",
+      "mass_kg": 0.06,
+      "center_in_flange_m": [
+        0.0,
+        -0.06975,
+        0.07124070785647896
+      ],
+      "inertia_at_com_in_flange_kg_m2": [
+        [
+          1.1465e-05,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.300875e-05,
+          2.6738534341844543e-06
+        ],
+        [
+          0.0,
+          2.673853434184455e-06,
+          1.609625e-05
+        ]
+      ],
+      "basis": "60g nominal, 42x42x23mm uniform box at its geometric center; not calibrated mass properties."
+    },
+    {
+      "name": "camera_screw_and_washer_at_x_-0.01",
+      "mass_kg": 0.001,
+      "center_in_flange_m": [
+        0.01,
+        -0.07675,
+        0.05911635220349683
+      ],
+      "inertia_at_com_in_flange_kg_m2": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "basis": "1g point-mass allowance at the rear plate screw axis. Existing gripper screws not counted twice."
+    },
+    {
+      "name": "camera_screw_and_washer_at_x_0.01",
+      "mass_kg": 0.001,
+      "center_in_flange_m": [
+        -0.01,
+        -0.07675,
+        0.05911635220349683
+      ],
+      "inertia_at_com_in_flange_kg_m2": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "basis": "1g point-mass allowance at the rear plate screw axis. Existing gripper screws not counted twice."
+    }
+  ],
+  "total_mass_kg": 1.0098550544536928,
+  "principal_moments_kg_m2": [
+    0.0015566669556900472,
+    0.0016574543206546802,
+    0.002073918063623461
+  ],
+  "TCP_unchanged": true,
+  "payload_for_empty_gripper_kg": 0,
+  "activated_in_desk": true,
+  "live_state_verified": true,
+  "motion_executed": false,
+  "limitations": [
+    "PETG solid-density reference overestimates a partly hollow print; exact brand/density and sliced distribution are unknown.",
+    "Camera inertia/COM and fasteners are geometric estimates. USB connector/cable mass and forces are not separately modeled.",
+    "Flange registration inherits the old nominal mounting convention; photos corroborate assembly, not calibrated axes or millimeter distances.",
+    "Original gripper inertia is the prior vendor-URDF fully-open estimate; finger motion changes the real inertia.",
+    "This is an inertial/TCP configuration, not a camera collision envelope or optical hand-eye calibration."
+  ],
+  "application_report": "reports/d405_desk_apply_20261031_1523/application_status.json",
+  "live_state_verification_utc": "2026-10-31T07:43:45.391518+00:00"
+}

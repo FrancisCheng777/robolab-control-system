@@ -1,0 +1,21 @@
+{
+  "D405_wrist_mount_R2_PRINT.stl": "9c350d21205a0faee85acca7afb5d60a310e1c03f1203e23c381fcc883bde388",
+  "D405_wrist_mount_R2.step": "aa2665bdaa102aa09df4dc16294182dae56d95061f027cd0242e2934a4f40f2d",
+  "D405_R2_mount.f3d": "865c34eb776d2944d9c9bd0ace242904973239cb1b7a75a45dd7d364ede5dd02",
+  "D405_R2_mount.png": "481567f3fa3e8becbde22e568b151ae1335543a0bb74c696d81f87157fe6b1e4",
+  "D405_R2_assembly.png": "48c828ce35bd10449e06072381272d847d407c82defd2ec86129ecdee167ceb0",
+  "D405_R2_optical_views.png": "3e5b74c341a205d8bcf0b09f35ac7728fd6e4ee2e828aad8fe847882131b9aee",
+  "PRINT_AND_ASSEMBLY.md": "9ae42d51558198dc908aafb7ca5b468218276285a65534b32e9e3d0c842b9e51",
+  "mechanical_checks.json": "ebb5ae6dede8aaafcabf0ad93cf45aed109f656eb2daec92ac33aa4a3a1b3ed1",
+  "optical_checks.json": "e9184b00fd3f475ad0c9df0bc21c8b0c958a3b3fdb452a019fe26d1bb5f56514",
+  "fusion_closed_check.json": "1e05f9ec545cd6a2df0731226df068125d7e1c8e2e6a6c4aced947e74b1f0509",
+  "build_mount.py": "a00b2e83d57bbb607b014881fa05035817702bfc6fc792d411d2fcec84f523cc",
+  "reference/preserved_two_screw_seat.step": "a885c6682d823b10a11dd5d58c028ebe2d36464ccf019e66e61dde71b731f8ff",
+  "policy_256_lens_1_closed.png": "aa8d7ea8e07a28e73a59e05c62a3aef06081cc6ecae1d1b3c012c9ee281f6e4f",
+  "policy_256_lens_1_opening_envelope.png": "650575e4831bd96923b623cd94f62ad0798a62d63604dae3ad264d6c96937ac6",
+  "policy_256_lens_2_closed.png": "17e62d824ec82d1d480ed9bf3ba86ca01900d3e492e5faa6db378dbcab5df145",
+  "policy_256_lens_2_opening_envelope.png": "3ed27da9c2fe118ba03d1fed58e535f3b040659880ff581e539e3366ec99756f",
+  "requirements.txt": "f3b260936256f0cf41abd356bfe6be0169aa296c511ce343507409d2016856f9",
+  ".gitattributes": "aca61950f39fd5f94a164a1a10f0226a23343991cb59ac3b8187f2ce40e1f558"
+}
+
