@@ -67,6 +67,7 @@ def main():
     parser.add_argument("--output")
     parser.add_argument("--guide", action="store_true", help="show per-joint operator guidance")
     parser.add_argument("--event-log", help="JSONL events for the operator guide")
+    parser.add_argument("--teleop-only", action="store_true", help="interactive control only; no cameras or datasets")
     parser.add_argument("--one-episode", action="store_true", help="exit after one labeled episode")
     parser.add_argument("--frames", type=int, default=0, help="noninteractive mock length")
     parser.add_argument("--session", required=True, help="physical collection session; train/val split unit")
@@ -81,6 +82,10 @@ def main():
         from .control_timing import validate_rates
         validate_rates(config)
     interactive = args.execute or args.interactive
+    if args.teleop_only:
+        if not interactive or 'teleop_hz' not in config:
+            parser.error('--teleop-only requires interactive mode and explicit teleop_hz')
+        config['recording_enabled'] = False
     if args.execute and (args.frames or not config["hardware_verified"]):
         parser.error("real collection needs hardware_verified=true and interactive outcome labels")
     if interactive and not sys.stdin.isatty():
@@ -94,7 +99,7 @@ def main():
     error = None
     outcome, reason = "aborted", ""
     try:
-        cameras = SyntheticPair() if args.mock else Pair(config["cameras"])
+        cameras = None if args.teleop_only else (SyntheticPair() if args.mock else Pair(config["cameras"]))
         leader = None if args.mock else Gello(config["gello_port"], j7_offset_rad=shift,robolab=config.get("teleop_controller")=="robolab_torque",
             max_sample_age_s=config.get("gello_max_sample_age_s") if "teleop_hz" in config else None)
         # The first vendor read waits ~100 ms for the Dynamixel cache. Warm it
@@ -126,7 +131,7 @@ def main():
             deadline = time.monotonic()
             while session.tick(keys.read(sys.stdin.fileno())):
                 if args.one_episode and session.completed_episodes:
-                    print("本条已保存，单条试采结束。", flush=True)
+                    print("试动结束，未录制数据。" if args.teleop_only else "本条已保存，单条试采结束。", flush=True)
                     break
                 deadline += period
                 lag = time.monotonic() - deadline

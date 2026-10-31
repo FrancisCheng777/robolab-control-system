@@ -5,7 +5,14 @@ LATENCY_PROFILE="${1:-fast}"
 LATENCY_MODE="${2:---inspect}"
 case "$LATENCY_PROFILE" in baseline|fast|feedforward) ;; *) echo 'profile: baseline | fast | feedforward'; exit 2;; esac
 case "$LATENCY_MODE" in --inspect|--execute) ;; *) echo 'mode: --inspect | --execute'; exit 2;; esac
-[[ $# -le 2 ]] || exit 2
+[[ $# -le 3 ]] || exit 2
+case "${3:-}" in
+  --teleop-only)
+    [[ "$LATENCY_PROFILE" != baseline ]] || { echo 'teleop-only requires fast or feedforward'; exit 2; }
+    export PI05_TELEOP_ONLY=1 ;;
+  "") export PI05_TELEOP_ONLY=0 ;;
+  *) echo 'optional third argument: --teleop-only'; exit 2 ;;
+esac
 export PI05_TRIAL_CONFIG_DIR="$LATENCY_ROOT/configs/latency/$LATENCY_PROFILE"
 export PI05_TRIAL_RUN_ROOT="$LATENCY_ROOT/reports/latency_trials/$LATENCY_PROFILE"
 export PI05_TRIAL_DATA_ROOT="$LATENCY_ROOT/data/latency_trials/$LATENCY_PROFILE"

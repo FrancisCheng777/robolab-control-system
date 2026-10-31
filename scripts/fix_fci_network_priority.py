@@ -61,6 +61,33 @@ def apply_priority(state):
         raise
 
 
+def collection_lock(path, uid, gid):
+    """Create the coordination lock on first use, without trusting symlinks."""
+    try:
+        fd = os.open(path, os.O_RDWR | os.O_NOFOLLOW | os.O_CREAT | os.O_EXCL, 0o660)
+    except FileExistsError:
+        fd = os.open(path, os.O_RDWR | os.O_NOFOLLOW | os.O_NONBLOCK)
+    else:
+        try:
+            if os.geteuid() == 0:
+                os.fchown(fd, uid, gid)
+        except BaseException:
+            os.close(fd)
+            raise
+    try:
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode) or info.st_uid != uid:
+            raise RuntimeError('Unexpected collection lock owner/type')
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise RuntimeError('Collection/control is active; exit it first') from exc
+    except BaseException:
+        os.close(fd)
+        raise
+    return fd
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     modes = parser.add_mutually_exclusive_group()
@@ -70,14 +97,8 @@ def main():
     if args.apply or args.rollback:
         if os.geteuid() != 0:
             raise SystemExit('sudo is required to change a kernel thread priority')
-        fd = os.open('/tmp/pi05-robolab-trial-20261030.lock', os.O_RDWR | os.O_NOFOLLOW)
-        info = os.fstat(fd)
-        if not stat.S_ISREG(info.st_mode) or info.st_uid != pwd.getpwnam('heinrich').pw_uid:
-            raise SystemExit('Unexpected collection lock owner/type')
-        try:
-            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            raise SystemExit('Collection/control is active; exit it first')
+        user = pwd.getpwnam('heinrich')
+        fd = collection_lock('/tmp/pi05-robolab-trial-20261030.lock', user.pw_uid, user.pw_gid)
     if args.rollback:
         folder = args.rollback.resolve()
         if folder.parent != Path('/var/backups') or folder.stat().st_uid != 0:
@@ -96,6 +117,10 @@ def main():
     print(json.dumps(state, indent=2))
     if not args.apply:
         print('Dry run: proposed SCHED_FIFO 50 for this one network softirq thread only.')
+        return
+    if state['policy'] == os.SCHED_FIFO and state['priority'] == 50:
+        print('Network FIFO 50 is already applied; no changes needed.')
+        os.close(fd)
         return
     if state['policy'] != os.SCHED_OTHER or state['priority'] != 0:
         raise SystemExit('Thread is not ordinary SCHED_OTHER; inspect instead of overwriting')

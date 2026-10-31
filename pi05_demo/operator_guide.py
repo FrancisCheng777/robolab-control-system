@@ -72,6 +72,12 @@ class OperatorGuide:
         if self.log:
             self.log.write(json.dumps({"event": event, **data}, ensure_ascii=False) + "\n")
             self.log.flush()
+        if event == 'recording' and data.get('teleop_only'):
+            print('\n正在遥操作：相机关闭、不录数据。Enter 停止并结束本轮；q 退出。', flush=True)
+            return
+        if event == 'teleop_finished':
+            print(f"\n本轮遥操作结束，共 {data['updates']} 次控制更新；没有生成训练数据。", flush=True)
+            return
         if event == "home_progress":
             print(f"回位检查：最大角度误差 {math.degrees(data['max_error_rad']):.2f}° / "
                   f"允许 {math.degrees(data['tolerance_rad']):.2f}°；"

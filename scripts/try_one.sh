@@ -32,6 +32,10 @@ if [[ "$TRIAL_CONTINUOUS" == 1 ]]; then
     'q 或 Ctrl-C 退出整个采集；未标记的当前条保存为 aborted。' \
     '每条之间不自动回初始位。初始位、GELLO 映射及故障保护保持不变。' \
     '现在尚未连接 Franka 控制。按 Enter 继续，输入 q 后 Enter 退出。'
+elif [[ "${PI05_TELEOP_ONLY:-0}" == 1 ]]; then
+  printf '%s\n' '仅遥操作试动：不启用 Kinect/D405、不生成训练数据。' \
+    'Enter 启动设备 → Enter 回位 → Enter 开始跟随；再次 Enter 停止并结束本轮。' \
+    'q 或 Ctrl-C 退出。现在尚未连接 Franka 控制，按 Enter 继续。'
 else
 printf '%s\n' 'RoboLab 单条试采：GELLO 大致与机器人同向即可，不要求七轴逐一对齐。' \
   '准备好后 Enter 启动设备；看到准备完成再 Enter 回初始位，再 Enter 开始跟随并录制。' \
@@ -112,7 +116,8 @@ error = None
 while time.monotonic() < deadline:
     try:
         bridge = Bridge(sys.argv[1], mock=False)
-        print('机器人通信就绪，正在启动双相机和 GELLO。', flush=True)
+        import os
+        print('机器人通信就绪，正在启动 GELLO（仅遥操作，无相机）。' if os.environ.get('PI05_TELEOP_ONLY') == '1' else '机器人通信就绪，正在启动双相机和 GELLO。', flush=True)
         break
     except (OSError, RuntimeError) as exc:
         error = exc
@@ -126,6 +131,7 @@ then
   exit 1
 fi
 TRIAL_EPISODE_ARGS=(--one-episode)
+if [[ "${PI05_TELEOP_ONLY:-0}" == 1 ]]; then TRIAL_EPISODE_ARGS+=(--teleop-only); fi
 TRIAL_COLLECTION_CONFIG="$TRIAL_CONFIG_DIR/collection.trial.json"
 if [[ "$TRIAL_CONTINUOUS" == 1 ]]; then
   TRIAL_EPISODE_ARGS=()
@@ -162,6 +168,8 @@ if compgen -G "$TRIAL_DATA/*.h5" >/dev/null; then
       .venv/bin/python scripts/check_trial.py --input "$TRIAL_DATA" --report "$TRIAL_RUN"
     fi
   fi
+elif [[ "${PI05_TELEOP_ONLY:-0}" == 1 ]]; then
+  echo '仅遥操作模式：没有录制或导出数据。'
 else
   echo '本轮尚未产生完整 episode。'
 fi

@@ -11,6 +11,13 @@ from .contract import encode, validate_target, validate_frames, vector
 from .episode import EpisodeWriter
 
 
+class TeleopCounter:
+    """In-memory count only; no images, synthetic observations, or dataset file."""
+    robolab = True
+    def __init__(self): self.count = 0
+    def close_incomplete(self): pass
+
+
 class Keys:
     """Decode terminal F2/Enter, including escape sequences split across reads."""
     sequences = (b"\x1bOQ", b"\x1b[12~", b"\x1b[[B")
@@ -131,7 +138,10 @@ class CollectionSession:
         self.bridge, self.cameras, self.leader = bridge, cameras, leader
         self.config, self.output, self.session = config, output, session
         self.mock = mock
+        self.recording_enabled = config.get('recording_enabled', True)
         self.fast_control = 'teleop_hz' in config
+        if not self.recording_enabled and not self.fast_control:
+            raise ValueError('teleop-only mode requires explicit teleop_hz')
         if self.fast_control:
             from .control_timing import validate_rates
             validate_rates(config)
@@ -173,6 +183,17 @@ class CollectionSession:
         self.announce("settling")
 
     def _finish(self, outcome, reason="operator label"):
+        if not self.recording_enabled:
+            updates = self.writer.count
+            self.writer = None
+            self.completed_episodes += 1
+            self.pending_outcome = None
+            self.phase = 'standby'
+            self.announce('teleop_finished', updates=updates, recorded=False)
+            if self.control_intervals:
+                self.announce('control_timing', samples=len(self.control_intervals),
+                              interval_ms_p50_p95_p99=np.percentile(self.control_intervals, [50,95,99]).tolist())
+            return
         if self.writer.count == 0:
             outcome, reason = "aborted", "empty trial"
         if hasattr(self.writer, 'begin_finish') and not self.closed:
@@ -214,7 +235,7 @@ class CollectionSession:
             ending = next((k for k in keys if k in ("toggle", "s", "f", "a")), None)
             if ending is not None:
                 outcome = {"s": "success", "f": "failure", "a": "aborted"}.get(ending)
-                self._settle(state, "label", outcome)
+                self._settle(state, "label", outcome if self.recording_enabled else "aborted")
                 return True
             for key in keys:
                 if key == "c":
@@ -242,8 +263,10 @@ class CollectionSession:
                     self.next_record_at += (missed+1)*self.record_period
             record_frame(self.bridge, self.cameras, self.leader, self.writer,
                          critical=self.critical, intervention=self.intervention,
-                         require_alignment=self.first_frame, record=record,
+                         require_alignment=self.first_frame, record=record and self.recording_enabled,
                          state=state if self.fast_control else None)
+            if not self.recording_enabled:
+                self.writer.count += 1
             self.first_frame = False
             return True
         if self.phase == 'saving':
@@ -360,12 +383,15 @@ class CollectionSession:
                     writer_type = AsyncEpisodeWriter
                 self.next_record_at = self.last_control_at = None
                 self.control_intervals = []
-                self.writer = writer_type(self.output, mock=self.mock, task=self.config["task"],
-                    session=self.session, config={**self.config, "bridge_calibration": state["calibration"]})
+                if self.recording_enabled:
+                    self.writer = writer_type(self.output, mock=self.mock, task=self.config["task"],
+                        session=self.session, config={**self.config, "bridge_calibration": state["calibration"]})
+                else:
+                    self.writer = TeleopCounter()
                 self.critical = self.intervention = False
                 self.first_frame = not self.robolab
                 self.phase = "recording"
-                self.announce("recording", message="F2/Enter: stop then label; s/f/a: stop with label.")
+                self.announce("recording", teleop_only=not self.recording_enabled, message="F2/Enter: stop following." if not self.recording_enabled else "F2/Enter: stop then label; s/f/a: stop with label.")
         return True
 
     def close(self, reason="session closed"):
