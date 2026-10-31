@@ -1,0 +1,26 @@
+{
+  "kind": "offline actual reference generator; no robot dynamics or hardware",
+  "results": [
+    {
+      "axis": 5,
+      "leader_ramp_deg_per_s": 30,
+      "leader_stops_at_s": 1,
+      "reference_deg_at_1s": 28.64788975654118,
+      "reference_reaches_30deg_at_s": 1.048
+    },
+    {
+      "axis": 6,
+      "leader_ramp_deg_per_s": 30,
+      "leader_stops_at_s": 1,
+      "reference_deg_at_1s": 28.6478897565478,
+      "reference_reaches_30deg_at_s": 1.048
+    },
+    {
+      "axis": 7,
+      "leader_ramp_deg_per_s": 30,
+      "leader_stops_at_s": 1,
+      "reference_deg_at_1s": 28.64788975654118,
+      "reference_reaches_30deg_at_s": 1.048
+    }
+  ]
+}

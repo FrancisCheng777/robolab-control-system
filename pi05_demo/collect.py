@@ -116,6 +116,8 @@ def main():
             leader.read_for_alignment()
         bridge = Bridge(args.socket or config["socket"], mock=args.mock)
         leader = MockLeader(bridge) if args.mock else leader
+        from .teleop_runtime import configure_runtime
+        runtime_settings = configure_runtime(config)
         period = 1 / config.get("teleop_hz", config["control_hz"])
         if interactive:
             print(f"Panda home (rad): {config['arm_home']}", flush=True)
@@ -123,6 +125,7 @@ def main():
             if args.guide:
                 from .operator_guide import OperatorGuide
                 guide = OperatorGuide(args.event_log)
+                guide('teleop_runtime', **runtime_settings)
             session = CollectionSession(bridge, cameras, leader, config, output,
                                         args.session, mock=args.mock, announce=guide)
             terminal = termios.tcgetattr(sys.stdin)

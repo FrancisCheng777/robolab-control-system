@@ -33,6 +33,17 @@ class FollowupProfileTests(unittest.TestCase):
             CollectionSession(bridge, None, Leader(), config, '.', 'test', mock=True)
         bridge.claim.assert_not_called()
 
+    def test_wrong_responsive_speed_or_stiffness_rejected_before_claim(self):
+        for expected in ('expected_max_velocity', 'expected_teleop_joint_kp'):
+            bridge = StubBridge()
+            bridge.claim = Mock()
+            config = dict(teleop_controller='robolab_torque', arm_home=bridge.state()['q'],
+                          task='test', control_hz=15, teleop_hz=100, async_recording=True,
+                          recording_enabled=False, **{expected: [1]*7})
+            with self.assertRaisesRegex(ValueError, 'profile mismatch'):
+                CollectionSession(bridge, None, Leader(), config, '.', 'test', mock=True)
+            bridge.claim.assert_not_called()
+
     def test_mock_follower_moves_past_initial_lead_band_and_holds(self):
         with mock_bridge(robolab=True, config_overrides={
                 'teleop_reference_lead_limit_rad': .08,

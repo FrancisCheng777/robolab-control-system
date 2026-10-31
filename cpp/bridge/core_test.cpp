@@ -64,6 +64,23 @@ int main() {
     try{late_callback.update(std::numeric_limits<double>::quiet_NaN());}catch(...){robolab_rejected=true;}
     require(robolab_rejected,"nonfinite callback interval must be rejected");
 
+    // Opt-in wrist stiffness must affect tracking, preserve hold, and leave home unchanged.
+    auto responsive_fixture=fixture();
+    responsive_fixture["teleop_joint_kp"]=Joints{120,120,120,120,120,150,90};
+    const Config responsive_cfg(responsive_fixture);
+    RobolabMotion wrist(responsive_cfg,Joints{});
+    wrist.target(Joints{0,0,0,0,0,0,1});wrist.update();
+    require(std::abs(wrist.torques()[6]-.045)<1e-12,"configured J7 tracking gain not applied");
+    wrist.hold();require(std::abs(wrist.torques()[6]-.045)<1e-12,"hold switched wrist stiffness");
+    RobolabMotion wrist_home(responsive_cfg,Joints{});
+    wrist_home.target(Joints{0,0,0,0,0,0,1},true);wrist_home.update();
+    require(std::abs(wrist_home.torques()[6]-.0036)<1e-12,"teleop stiffness changed home control");
+    for(double invalid:{0.,-1.,90.01,std::numeric_limits<double>::quiet_NaN()}) {
+      auto bad=responsive_fixture;bad["teleop_joint_kp"][6]=invalid;const Config c(bad);bool denied=false;
+      try{RobolabMotion m(c,Joints{});}catch(...){denied=true;}
+      require(denied,"invalid or excessive teleop gain accepted");
+    }
+
     // A matched moving reference must not be damped toward zero velocity.
     auto ff_fixture=fixture();ff_fixture["teleop_velocity_feedforward"]=1.;
     const Config ff_cfg(ff_fixture);RobolabMotion ff(ff_cfg,Joints{});

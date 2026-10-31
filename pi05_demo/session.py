@@ -153,7 +153,9 @@ class CollectionSession:
         if self.robolab != (state["calibration"].get("teleop_controller")=="robolab_torque"):
             raise ValueError("collector and bridge controller modes differ")
         for expected, field in [('expected_teleop_velocity_feedforward', 'teleop_velocity_feedforward'),
-                                ('expected_reference_lead_limit_rad', 'teleop_reference_lead_limit_rad')]:
+                                ('expected_reference_lead_limit_rad', 'teleop_reference_lead_limit_rad'),
+                                ('expected_max_velocity', 'max_velocity'),
+                                ('expected_teleop_joint_kp', 'teleop_joint_kp')]:
             if expected in config and state['calibration'].get(field, 0.) != config[expected]:
                 raise ValueError(f'bridge profile mismatch: {field}')
         self.announce = announce or (lambda event, **data:
@@ -177,6 +179,7 @@ class CollectionSession:
                       feedforward_gain=state['calibration'].get('teleop_velocity_feedforward', 0.),
                       reference_lead_limit_rad=state['calibration'].get('teleop_reference_lead_limit_rad', 0.),
                       max_velocity_rad_s=state['calibration'].get('max_velocity'),
+                      teleop_joint_kp=state['calibration'].get('teleop_joint_kp', [120,120,120,120,120,150,60]),
                       recording_enabled=self.recording_enabled)
         self.announce("init", message="F2/Enter: startup home; q/Ctrl-C: exit. Clear the home path first.")
 

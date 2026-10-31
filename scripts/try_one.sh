@@ -104,7 +104,7 @@ trial_cleanup() {
 }
 trap trial_cleanup EXIT
 # ROS shell libraries can shadow the pinned Ruckig build. Use the binary RUNPATH.
-env -u LD_LIBRARY_PATH PI05_CONTROL_CPU=12 taskset -c 0-11,13-19 "$TRIAL_ROOT/build/pi05_franka_bridge" --config "$TRIAL_CONFIG_DIR/bridge.trial.json" \
+env -u LD_LIBRARY_PATH PI05_CONTROL_CPU=12 taskset -c "${PI05_TRIAL_BRIDGE_CPUS:-0-11,13-19}" "$TRIAL_ROOT/build/pi05_franka_bridge" --config "$TRIAL_CONFIG_DIR/bridge.trial.json" \
   --robot 172.16.0.40 --socket "$TRIAL_SOCKET" --fault-log "$TRIAL_RUN/franka_fault.csv" > "$TRIAL_RUN/bridge.log" 2>&1 &
 TRIAL_BRIDGE_PID=$!
 printf '%s\n' "$TRIAL_BRIDGE_PID" > "$TRIAL_RUN/bridge.pid"
@@ -145,7 +145,7 @@ Path(sys.argv[1]).write_text(json.dumps(config, indent=2) + '\n')
 PYCONFIG
 fi
 set +e
-taskset -c 0-11,13-19 ./scripts/collect.sh --execute --config "$TRIAL_COLLECTION_CONFIG" \
+taskset -c "${PI05_TRIAL_COLLECTION_CPUS:-0-11,13-19}" ./scripts/collect.sh --execute --config "$TRIAL_COLLECTION_CONFIG" \
   --session "$TRIAL_SESSION" --output "$TRIAL_DATA" --guide "${TRIAL_EPISODE_ARGS[@]}" \
   --event-log "$TRIAL_RUN/events.jsonl"
 TRIAL_RESULT=$?

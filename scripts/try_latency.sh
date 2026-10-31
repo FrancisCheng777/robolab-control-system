@@ -3,7 +3,7 @@ set -euo pipefail
 LATENCY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LATENCY_PROFILE="${1:-fast}"
 LATENCY_MODE="${2:---inspect}"
-case "$LATENCY_PROFILE" in baseline|fast|feedforward|feedforward075|feedforward_guarded|feedforward075_j2_22) ;; *) echo 'profile: baseline | fast | feedforward | feedforward075 | feedforward_guarded | feedforward075_j2_22'; exit 2;; esac
+case "$LATENCY_PROFILE" in baseline|fast|feedforward|feedforward075|feedforward_guarded|feedforward075_j2_22|responsive) ;; *) echo 'profile: baseline | fast | feedforward | feedforward075 | feedforward_guarded | feedforward075_j2_22 | responsive'; exit 2;; esac
 case "$LATENCY_MODE" in --inspect|--execute) ;; *) echo 'mode: --inspect | --execute'; exit 2;; esac
 [[ $# -le 3 ]] || exit 2
 case "${3:-}" in
@@ -37,4 +37,13 @@ for process in Path('/proc').iterdir():
     if args and Path(args[0].decode(errors='replace')).name == 'pi05_franka_bridge' and b'--mock' not in args:
         raise SystemExit(f'Existing physical bridge PID {process.name}; exit its owning session before testing. No process was stopped.')
 PY
+if [[ "$LATENCY_PROFILE" == responsive ]]; then
+  export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
+  export PI05_TRIAL_BRIDGE_CPUS=14-19 PI05_TRIAL_COLLECTION_CPUS=13-19
+  if ! /usr/bin/python3 "$LATENCY_ROOT/scripts/set_teleop_usb_latency.py" --check; then
+    echo '需要将 GELLO/Robotiq USB 缓冲临时设为 1 ms；请输入 4090 sudo 密码。此步骤不会启动设备。'
+    sudo /usr/bin/python3 "$LATENCY_ROOT/scripts/set_teleop_usb_latency.py" --apply
+    /usr/bin/python3 "$LATENCY_ROOT/scripts/set_teleop_usb_latency.py" --check
+  fi
+fi
 exec "$LATENCY_ROOT/scripts/try_one.sh"

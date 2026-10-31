@@ -9,10 +9,14 @@ class RobolabMotion {
   bool held_{true}, stopping_{false}, home_{false};
   unsigned stop_cycles_{0};
   double alpha_, home_velocity_, velocity_ff_, lead_limit_;
-  Joints ff_velocity_{};
+  Joints ff_velocity_{}, teleop_kp_;
  public:
   RobolabMotion(const Config& cfg, const Joints& q):cfg_(cfg),desired_(q),target_(q),filtered_(q),measured_(q),
       kp_{120,120,120,120,120,150,60},kd_{20,20,20,20,20,20,20},alpha_(cfg.raw.value("cmd_filter_alpha",1.)),home_velocity_(cfg.raw.value("home_max_velocity",.06)) {
+    teleop_kp_=cfg.raw.value("teleop_joint_kp",kp_);
+    for(size_t i=0;i<7;++i)
+      if(!std::isfinite(teleop_kp_[i]) || teleop_kp_[i]<=0 || teleop_kp_[i]>1.5*kp_[i])
+        throw std::invalid_argument("teleop_joint_kp must be positive and <= 1.5 times the original gain");
     velocity_ff_=cfg.raw.value("teleop_velocity_feedforward",0.);
     if(!std::isfinite(velocity_ff_) || velocity_ff_<0 || velocity_ff_>1)
       throw std::invalid_argument("teleop_velocity_feedforward must be in [0, 1]");
@@ -72,7 +76,8 @@ class RobolabMotion {
   }
   Joints torques() const {
     Joints tau{};
-    for(size_t i=0;i<7;++i)tau[i]=std::clamp(kp_[i]*(desired_[i]-measured_[i])+kd_[i]*(velocity_ff_*ff_velocity_[i]-dq_[i]),-60.,60.);
+    const auto& gains=home_?kp_:teleop_kp_;
+    for(size_t i=0;i<7;++i)tau[i]=std::clamp(gains[i]*(desired_[i]-measured_[i])+kd_[i]*(velocity_ff_*ff_velocity_[i]-dq_[i]),-60.,60.);
     return tau;
   }
   const Joints& position()const noexcept{return desired_;}

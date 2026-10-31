@@ -1,0 +1,39 @@
+{
+  "kind": "CPU mock only, no hardware or cameras",
+  "runtime": {
+    "main_cpu": 13,
+    "gil_switch_interval_s": 0.001
+  },
+  "actual_main_affinity": [
+    13
+  ],
+  "profile": {
+    "event": "control_profile",
+    "profile": "responsive",
+    "teleop_hz": 100,
+    "feedforward_gain": 1.0,
+    "reference_lead_limit_rad": 0.0,
+    "max_velocity_rad_s": [
+      0.3,
+      0.3,
+      0.3,
+      0.3,
+      0.5,
+      0.5,
+      0.5
+    ],
+    "teleop_joint_kp": [
+      120,
+      120,
+      120,
+      120,
+      120,
+      150,
+      90
+    ],
+    "recording_enabled": false
+  },
+  "joint_motion_verified": true,
+  "hold_verified": true,
+  "dataset_files": 0
+}
