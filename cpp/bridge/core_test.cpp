@@ -90,6 +90,30 @@ int main() {
     ramped.stop();ramped.update();ramped.synchronize(ramped.position(),Joints{});
     for(double t:ramped.torques())require(std::abs(t)<1e-10,"stop retained feedforward");
 
+    // A stalled follower must not accumulate an arbitrarily distant reference.
+    auto guarded_fixture=fixture();guarded_fixture["teleop_velocity_feedforward"]=.75;
+    guarded_fixture["teleop_reference_lead_limit_rad"]=.08;
+    const Config guarded_cfg(guarded_fixture);RobolabMotion guarded(guarded_cfg,Joints{});
+    guarded.target(Joints{1,1,1,1,1,1,1});
+    for(int n=0;n<1200;++n)guarded.update();
+    for(double q:guarded.position())require(std::abs(q-.08)<1e-10,"stalled follower reference continued chasing distant leader");
+    for(size_t i=0;i<7;++i)require(std::abs(guarded.torques()[i])<=12.000001,"stalled feedforward did not settle to bounded PD reference");
+    guarded.target(Joints{-1,-1,-1,-1,-1,-1,-1});
+    const auto before_reverse=guarded.position();guarded.update();
+    for(size_t i=0;i<7;++i)require(guarded.position()[i]<before_reverse[i] && before_reverse[i]-guarded.position()[i]<=guarded_cfg.velocity[i]*.001+1e-12,"guarded reversal stalled or jumped");
+    guarded.hold();const auto guard_hold=guarded.position();guarded.update();require(guarded.position()==guard_hold,"guard changed hold reference");
+    RobolabMotion guard_home(guarded_cfg,Joints{});guard_home.target(Joints{1,1,1,1,1,1,1},true);
+    for(int n=0;n<2000;++n)guard_home.update();
+    require(guard_home.position()[0]>.08,"teleop guard altered home trajectory");
+    RobolabMotion moving_guard(guarded_cfg,Joints{});moving_guard.target(Joints{1,1,1,1,1,1,1});
+    for(int n=0;n<300;++n){moving_guard.synchronize(moving_guard.position(),moving_guard.velocity());moving_guard.update();}
+    require(moving_guard.position()[0]>.08,"moving follower cannot continue beyond initial lead bound");
+    for(double invalid:{-.01,.201,std::numeric_limits<double>::quiet_NaN()}){
+      auto bad=fixture();bad["teleop_reference_lead_limit_rad"]=invalid;const Config c(bad);bool denied=false;
+      try{RobolabMotion m(c,Joints{});}catch(...){denied=true;}
+      require(denied,"invalid reference lead limit accepted");
+    }
+
     auto fast_home_fixture=fixture();fast_home_fixture["home_max_velocity"]=.18;
     const Config fast_home_cfg(fast_home_fixture);
     RobolabMotion fast_home(fast_home_cfg,Joints{});

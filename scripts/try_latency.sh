@@ -3,12 +3,12 @@ set -euo pipefail
 LATENCY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LATENCY_PROFILE="${1:-fast}"
 LATENCY_MODE="${2:---inspect}"
-case "$LATENCY_PROFILE" in baseline|fast|feedforward) ;; *) echo 'profile: baseline | fast | feedforward'; exit 2;; esac
+case "$LATENCY_PROFILE" in baseline|fast|feedforward|feedforward075|feedforward_guarded) ;; *) echo 'profile: baseline | fast | feedforward | feedforward075 | feedforward_guarded'; exit 2;; esac
 case "$LATENCY_MODE" in --inspect|--execute) ;; *) echo 'mode: --inspect | --execute'; exit 2;; esac
 [[ $# -le 3 ]] || exit 2
 case "${3:-}" in
   --teleop-only)
-    [[ "$LATENCY_PROFILE" != baseline ]] || { echo 'teleop-only requires fast or feedforward'; exit 2; }
+    [[ "$LATENCY_PROFILE" != baseline ]] || { echo 'teleop-only requires a fast/feedforward profile'; exit 2; }
     export PI05_TELEOP_ONLY=1 ;;
   "") export PI05_TELEOP_ONLY=0 ;;
   *) echo 'optional third argument: --teleop-only'; exit 2 ;;

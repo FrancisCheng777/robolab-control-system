@@ -6,6 +6,8 @@
 
 `main` 与 `baseline-20261031` 保存原版本。候选改动仅放独立分支，真机测试后由使用者决定是否合入。此次归档未改变原运行目录或启动/停止硬件。
 
+第二轮候选：`feedforward075` 和 `feedforward_guarded`，定位与试用命令见 [reflex 与跟随调整](docs/FOLLOWUP_20261031.md)。
+
 ## 当前实际入口
 
 - `scripts/collect_session.sh`：连续遥操作数采。

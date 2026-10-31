@@ -10,7 +10,8 @@ inline nlohmann::json fault_wrench_history(const std::vector<franka::Record>& lo
     rows.push_back({{"robot_time_ms", s.time.toMSec()}, {"q", s.q}, {"dq", s.dq},
       {"O_F_ext_hat_K", s.O_F_ext_hat_K}, {"K_F_ext_hat_K", s.K_F_ext_hat_K},
       {"tau_ext_hat_filtered", s.tau_ext_hat_filtered},
-      {"cartesian_collision", s.cartesian_collision}});
+      {"cartesian_collision", s.cartesian_collision},
+      {"joint_collision", s.joint_collision}, {"joint_contact", s.joint_contact}});
   }
   return {{"source", "libfranka ControlException log; estimated external wrench"},
     {"wrench_order", {"Fx", "Fy", "Fz", "Mx", "My", "Mz"}},

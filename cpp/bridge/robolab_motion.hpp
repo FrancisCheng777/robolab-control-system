@@ -8,7 +8,7 @@ class RobolabMotion {
   Joints desired_, target_, filtered_, velocity_{}, measured_, dq_{}, kp_, kd_;
   bool held_{true}, stopping_{false}, home_{false};
   unsigned stop_cycles_{0};
-  double alpha_, home_velocity_, velocity_ff_;
+  double alpha_, home_velocity_, velocity_ff_, lead_limit_;
   Joints ff_velocity_{};
  public:
   RobolabMotion(const Config& cfg, const Joints& q):cfg_(cfg),desired_(q),target_(q),filtered_(q),measured_(q),
@@ -16,6 +16,9 @@ class RobolabMotion {
     velocity_ff_=cfg.raw.value("teleop_velocity_feedforward",0.);
     if(!std::isfinite(velocity_ff_) || velocity_ff_<0 || velocity_ff_>1)
       throw std::invalid_argument("teleop_velocity_feedforward must be in [0, 1]");
+    lead_limit_=cfg.raw.value("teleop_reference_lead_limit_rad",0.);
+    if(!std::isfinite(lead_limit_) || lead_limit_<0 || lead_limit_>.2)
+      throw std::invalid_argument("teleop_reference_lead_limit_rad must be in [0, 0.2]");
     cfg.check_position(q);
     if(!std::isfinite(home_velocity_) || home_velocity_<=0 || home_velocity_>.2)
       throw std::invalid_argument("home_max_velocity must be in (0, 0.2] rad/s");
@@ -43,7 +46,13 @@ class RobolabMotion {
     if(!held_&&!stopping_)for(size_t i=0;i<7;++i){
       filtered_[i]=alpha_*target_[i]+(1-alpha_)*filtered_[i];
       const double step=std::min(home_?home_velocity_:.5,cfg_.velocity[i])*.001;
-      const double delta=std::clamp(filtered_[i]-desired_[i],-step,step);
+      // An obstructed follower must not keep building a remote position target.
+      // Bound the pursuit target, not the current reference: retain one-cycle
+      // slew limits even if measured position moves outside the previous band.
+      const double pursuit=(!home_ && lead_limit_>0)
+          ? std::clamp(filtered_[i],measured_[i]-lead_limit_,measured_[i]+lead_limit_)
+          : filtered_[i];
+      const double delta=std::clamp(pursuit-desired_[i],-step,step);
       desired_[i]+=delta;velocity_[i]=delta/.001;
     }
     // Optional reference-velocity feedforward, ramped at the existing per-axis

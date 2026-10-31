@@ -2,6 +2,7 @@
 // Only this C++ process owns the FCI connection. No automatic recovery/homing.
 #include "core.hpp"
 #include "robolab_motion.hpp"
+#include <type_traits>
 #include "tool_configuration.hpp"
 #include "thread_placement.hpp"
 #include <chrono>
@@ -90,6 +91,8 @@ void mock_control_impl(Shared& s, const Config& cfg) {
   auto deadline = std::chrono::steady_clock::now();
   s.width = cfg.gripper_max;
   while (!s.stopped) {
+    if constexpr(std::is_same_v<Controller,RobolabMotion>)
+      motion.synchronize(motion.position(),motion.velocity());
     update_commands(s, motion, last, cfg);
     const bool finished = motion.update();
     s.arm_held = motion.hold_ready();

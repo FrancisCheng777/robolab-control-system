@@ -24,12 +24,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 @contextlib.contextmanager
-def mock_bridge(robolab=False):
+def mock_bridge(robolab=False, config_overrides=None):
     socket = f"/tmp/pi05-f2-test-{uuid.uuid4().hex[:12]}.sock"
     with tempfile.TemporaryFile(mode="w+") as log, tempfile.TemporaryDirectory() as config_dir:
         config_path=ROOT / "configs/bridge.mock.json"
         if robolab:
             cfg=json.loads(config_path.read_text());cfg["teleop_controller"]="robolab_torque"
+            cfg.update(config_overrides or {})
             config_path=Path(config_dir)/"bridge.json";config_path.write_text(json.dumps(cfg))
         process = subprocess.Popen([
             str(ROOT / "build/pi05_franka_bridge"), "--mock", "--config",

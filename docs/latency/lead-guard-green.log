@@ -1,0 +1,9 @@
+Test project /home/heinrich/robolab-control-system/build
+    Start 1: bridge_core_test
+1/2 Test #1: bridge_core_test .................   Passed    0.11 sec
+    Start 2: fault_history_test
+2/2 Test #2: fault_history_test ...............   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.13 sec

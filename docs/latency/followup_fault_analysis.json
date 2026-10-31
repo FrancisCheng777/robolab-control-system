@@ -1,0 +1,24 @@
+{
+  "observed_trial": "reports/latency_trials/fast/trial_20261031_182608",
+  "observed_profile": "fast",
+  "observed_feedforward": 0.0,
+  "bridge_exception": "joint_reflex",
+  "joint2_threshold_Nm": 20.0,
+  "joint2_external_torque_peak_Nm": 20.028551044650747,
+  "stiffness_frame_force_absolute_peak_N": [
+    49.26184153830436,
+    2.7841132286029127,
+    84.30596765968076
+  ],
+  "cartesian_collision_flag_any": false,
+  "fault_samples": 50,
+  "fault_history_sha256": "14ccdf0c906f1fe1b560e836fa9b7a02d004592125264116cf419cd75a52c257",
+  "feedforward_trial_directory_found": false,
+  "collision_thresholds_changed": false,
+  "hardware_started_by_this_task": false,
+  "limitations": [
+    "Latest available fault is from fast, not a verified feedforward trial.",
+    "External forces are robot estimates, not an independent force sensor.",
+    "50-sample fault log cannot establish the full contact history."
+  ]
+}
