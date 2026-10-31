@@ -11,7 +11,8 @@ from .session import CollectionSession, Keys, record_frame
 
 ROOT=Path(__file__).resolve().parents[1]
 class Gello:
-    def __init__(self,port,*,j7_offset_rad,robolab=False):
+    def __init__(self,port,*,j7_offset_rad,robolab=False,max_sample_age_s=None):
+        self.max_sample_age_s=max_sample_age_s
         self.robolab=robolab;self.last_unclipped_target=None
         if not np.isfinite(j7_offset_rad):raise ValueError("GELLO J7 offset must be finite")
         self.j7_offset_rad=float(j7_offset_rad)
@@ -21,6 +22,13 @@ class Gello:
         mod=importlib.util.module_from_spec(spec);sys.modules[spec.name]=mod;spec.loader.exec_module(mod)
         self.agent=GelloAgent(port=port);self.normalizer=mod.PandaJointPositionNormalizer()
     def _read(self, *, for_alignment=False):
+        if self.max_sample_age_s is not None:
+            # Check before returning a cached vendor reading. Never refresh an
+            # old leader sample merely because the fast loop read it again.
+            stamp = self.agent._robot._driver.last_successful_read_s
+            age = time.monotonic() - stamp
+            if stamp <= 0 or not 0 <= age <= self.max_sample_age_s:
+                raise RuntimeError(f'stale GELLO sample: {age:.3f}s')
         raw=np.asarray(self.agent.act({}),dtype=float).copy()
         if raw.shape!=(8,) or not 0<=raw[7]<=1:raise ValueError("GELLO requires 7 joints + closure in [0,1]")
         # Re-reference only the leader target; robot feedback stays in physical coordinates.
@@ -69,6 +77,9 @@ def main():
         shift = j7_offset_from_config(config)
     except ValueError as exc:
         parser.error(str(exc))
+    if 'teleop_hz' in config:
+        from .control_timing import validate_rates
+        validate_rates(config)
     interactive = args.execute or args.interactive
     if args.execute and (args.frames or not config["hardware_verified"]):
         parser.error("real collection needs hardware_verified=true and interactive outcome labels")
@@ -84,13 +95,23 @@ def main():
     outcome, reason = "aborted", ""
     try:
         cameras = SyntheticPair() if args.mock else Pair(config["cameras"])
-        leader = None if args.mock else Gello(config["gello_port"], j7_offset_rad=shift,robolab=config.get("teleop_controller")=="robolab_torque")
+        leader = None if args.mock else Gello(config["gello_port"], j7_offset_rad=shift,robolab=config.get("teleop_controller")=="robolab_torque",
+            max_sample_age_s=config.get("gello_max_sample_age_s") if "teleop_hz" in config else None)
         # The first vendor read waits ~100 ms for the Dynamixel cache. Warm it
         # before claiming control, so initialization cannot expire robot feedback.
-        if leader is not None: leader.read_for_alignment()
+        if leader is not None:
+            # Wait only before claiming the bridge. Production reads remain
+            # bounded and reject stale cached USB input.
+            if leader.max_sample_age_s is not None:
+                warm_deadline = time.monotonic() + 3
+                while leader.agent._robot._driver.last_successful_read_s <= 0:
+                    if time.monotonic() >= warm_deadline:
+                        raise RuntimeError('GELLO did not produce a fresh sample')
+                    time.sleep(.01)
+            leader.read_for_alignment()
         bridge = Bridge(args.socket or config["socket"], mock=args.mock)
         leader = MockLeader(bridge) if args.mock else leader
-        period = 1 / config["control_hz"]
+        period = 1 / config.get("teleop_hz", config["control_hz"])
         if interactive:
             print(f"Panda home (rad): {config['arm_home']}", flush=True)
             print(f"GELLO home reference (rad): {config['gello_reference_joints_rad']}; J7 shift={shift:+.6f}", flush=True)
@@ -116,6 +137,7 @@ def main():
                         raise RuntimeError(f"missed control deadline by {lag:.3f}s")
                 time.sleep(max(0, deadline - time.monotonic()))
         else:
+            period = 1 / config["control_hz"]
             # Preserve the automated mock collector contract used by smoke/export.
             state = bridge.state()
             bridge.claim()

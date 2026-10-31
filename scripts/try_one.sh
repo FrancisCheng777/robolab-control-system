@@ -9,20 +9,20 @@ case "${1:-}" in
   *) echo "用法：$0 [--continuous]"; exit 2 ;;
 esac
 [[ $# == 0 ]] || { echo '不支持额外参数'; exit 2; }
-TRIAL_CONFIG_DIR="$TRIAL_ROOT/reports/robolab_restore_20261030"
+TRIAL_CONFIG_DIR="${PI05_TRIAL_CONFIG_DIR:-$TRIAL_ROOT/reports/robolab_restore_20261030}"
 TRIAL_SESSION="trial_$(TZ=Asia/Taipei date +%Y%m%d_%H%M%S)"
-TRIAL_RUN="$TRIAL_CONFIG_DIR/$TRIAL_SESSION"
-TRIAL_DATA="$TRIAL_ROOT/data/trial_raw_20261030/$TRIAL_SESSION"
+TRIAL_RUN="${PI05_TRIAL_RUN_ROOT:-$TRIAL_CONFIG_DIR}/$TRIAL_SESSION"
+TRIAL_DATA="${PI05_TRIAL_DATA_ROOT:-$TRIAL_ROOT/data/trial_raw_20261030}/$TRIAL_SESSION"
 if [[ "$TRIAL_CONTINUOUS" == 1 ]]; then
   TRIAL_SESSION="collection_$(TZ=Asia/Taipei date +%Y%m%d_%H%M%S)"
   TRIAL_RUN="$TRIAL_ROOT/reports/collection/$TRIAL_SESSION"
   TRIAL_DATA="$TRIAL_ROOT/data/raw/$TRIAL_SESSION"
 fi
-TRIAL_SOCKET=/tmp/pi05-robolab-trial-20261030.sock
+TRIAL_SOCKET="${PI05_TRIAL_SOCKET:-/tmp/pi05-robolab-trial-20261030.sock}"
 exec 9>/tmp/pi05-robolab-trial-20261030.lock
 flock -n 9 || { echo '已有采集在运行，请使用原窗口。'; exit 1; }
 mkdir -p "$TRIAL_RUN" "$TRIAL_DATA"
-printf '%s\n' "$TRIAL_RUN" > "$TRIAL_CONFIG_DIR/latest_run.txt"
+printf '%s\n' "$TRIAL_RUN" > "${PI05_TRIAL_RUN_ROOT:-$TRIAL_CONFIG_DIR}/latest_run.txt"
 export PYTHONUNBUFFERED=1
 exec > >(tee -a "$TRIAL_RUN/collection.log") 2>&1
 if [[ "$TRIAL_CONTINUOUS" == 1 ]]; then
@@ -45,17 +45,24 @@ read -r TRIAL_START
 .venv/bin/python - <<'PYRT'
 import os
 if os.getpriority(os.PRIO_PROCESS, 0) != 0:
-    raise SystemExit('采集优先级异常（需要 nice=0）。请先运行 scripts/fix_realtime_priority.py --apply 的 sudo 修复，再在修复终端启动。')
+    raise SystemExit('当前终端优先级异常（需要 nice=0）。系统修复后请关闭旧终端，使用新登录会话；尚未修复时运行 sudo python3 scripts/fix_realtime_priority.py --apply。')
 if not {12, 13}.issubset(os.sched_getaffinity(0)):
     raise SystemExit('当前 CPU 亲和性不包含本机控制核 12；请在普通终端启动。')
+import sys
+sys.path.insert(0, 'scripts')
+from fix_fci_network_priority import discover
+network = discover()
+if network['policy'] != os.SCHED_FIFO or network['priority'] != 50:
+    raise SystemExit('机器人网卡实时接收调度未应用（重启后会失效）。请先执行 sudo python3 scripts/fix_fci_network_priority.py --apply，再启动采集。')
 PYRT
 .venv/bin/python - <<'PY'
 from pathlib import Path
-import json
+import json, os
 from pi05_demo.gripper_teleop import unowned
 root = Path.cwd()
-c = json.loads((root/'reports/robolab_restore_20261030/collection.trial.json').read_text())
-b = json.loads((root/'reports/robolab_restore_20261030/bridge.trial.json').read_text())
+config_root = Path(os.environ.get('PI05_TRIAL_CONFIG_DIR', str(root/'reports/robolab_restore_20261030')))
+c = json.loads((config_root/'collection.trial.json').read_text())
+b = json.loads((config_root/'bridge.trial.json').read_text())
 if not c['hardware_verified'] or not b['hardware_verified']:
     raise SystemExit('本轮试采配置尚未就绪。')
 for port in (c['gello_port'], b['gripper_device']):
@@ -149,7 +156,11 @@ if compgen -G "$TRIAL_DATA/*.h5" >/dev/null; then
   if [[ "$TRIAL_CONTINUOUS" == 1 ]]; then
     .venv/bin/python scripts/check_session.py --input "$TRIAL_DATA" --report "$TRIAL_RUN/session_check.json"
   else
-    .venv/bin/python scripts/check_trial.py --input "$TRIAL_DATA" --report "$TRIAL_RUN"
+    if [[ "${PI05_LATENCY_TRIAL:-0}" == 1 ]]; then
+      .venv/bin/python scripts/check_session.py --input "$TRIAL_DATA" --report "$TRIAL_RUN/session_check.json"
+    else
+      .venv/bin/python scripts/check_trial.py --input "$TRIAL_DATA" --report "$TRIAL_RUN"
+    fi
   fi
 else
   echo '本轮尚未产生完整 episode。'

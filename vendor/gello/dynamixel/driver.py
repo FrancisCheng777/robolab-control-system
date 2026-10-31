@@ -290,6 +290,7 @@ class DynamixelDriver(DynamixelDriverProtocol):
         except Exception as e:
             print(f"port: {self._port}, {e}")
 
+        self.last_successful_read_s = 0.
         self._start_reading_thread()
 
     def _initialize_fake_driver(self):
@@ -490,6 +491,7 @@ class DynamixelDriver(DynamixelDriverProtocol):
                         )
                 self._joint_angles = _joint_angles
                 self._velocities = _velocities
+                self.last_successful_read_s = time.monotonic()
             # self._groupSyncRead.clearParam()
 
     def get_positions_and_velocities(self) -> Tuple[np.ndarray, np.ndarray]:

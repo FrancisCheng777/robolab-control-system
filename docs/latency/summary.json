@@ -1,0 +1,82 @@
+{
+  "source_files_checked": 390,
+  "original_binary_unchanged": true,
+  "original_pid_still_present": false,
+  "original_process_actions_by_this_task": [],
+  "python_tests_passed": 91,
+  "cpp_tests_passed": 2,
+  "hardware_motion_started": false,
+  "benchmark": [
+    {
+      "mode": "baseline",
+      "commands": 90,
+      "frames": 90,
+      "command_interval_ms_p50_p95_p99": [
+        66.67557700166071,
+        67.40301179925154,
+        71.3372840797092
+      ],
+      "control_tick_ms_p50_p95_p99": [
+        44.909981999808224,
+        50.47223305091393,
+        71.2155691713815
+      ],
+      "recording_interval_ms_p50_p95_p99": [
+        66.67982500039216,
+        67.40221340005519,
+        71.33337191982719
+      ],
+      "mock": true
+    },
+    {
+      "mode": "fast",
+      "commands": 600,
+      "frames": 90,
+      "command_interval_ms_p50_p95_p99": [
+        10.063581999929738,
+        11.00956490081444,
+        11.745785680541301
+      ],
+      "control_tick_ms_p50_p95_p99": [
+        1.3336994998098817,
+        3.246343250521022,
+        4.275663060943769
+      ],
+      "recording_interval_ms_p50_p95_p99": [
+        69.62054500036174,
+        70.37775699973281,
+        70.80927328010148
+      ],
+      "mock": true
+    }
+  ],
+  "historical_real_episode": {
+    "source": "/home/heinrich/pi05_plug_demo/data/raw/collection_20261031_172055/episode_1793438469881927957_1e9233aa.h5",
+    "frames": 1041,
+    "command_cadence_proxy_ms_p50_p95_p99": [
+      101.55135999957565,
+      160.02441675063892,
+      192.46378593970803
+    ],
+    "ack_ms_p50_p95_p99": [
+      0.6599759999517119,
+      6.309024000074714,
+      10.666270799629265
+    ],
+    "joint_error_rad_p95": [
+      0.060051366825205454,
+      0.13971605440746282,
+      0.016606850532402767,
+      0.09185639443744553,
+      0.045837577704976595,
+      0.13203868757799286,
+      0.27177754523795233
+    ]
+  },
+  "source_changes_since_snapshot": [
+    "scripts/try_one.sh"
+  ],
+  "source_writes_by_this_task": [],
+  "concurrent_source_change": "Original scripts/try_one.sh gained FCI network scheduling preflight outside this task. Preserved in original; copied preflight into candidate only. Main stays at original snapshot.",
+  "hardware_validation": "not performed"
+}

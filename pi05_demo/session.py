@@ -1,5 +1,6 @@
 """F2 collection sessions: explicit startup home, held standby, aligned takeover."""
 import json
+import math
 import os
 import select
 import time
@@ -84,11 +85,12 @@ class HomePath:
 
 
 def record_frame(bridge, cameras, leader, writer, *, critical=False,
-                 intervention=False, require_alignment=False):
-    state = bridge.state()
+                 intervention=False, require_alignment=False, record=True, state=None):
+    state = bridge.state() if state is None else state
     received = time.monotonic()
     q = np.asarray(state["q"], dtype=float)
-    frames, metadata = cameras.capture_with_metadata()
+    if record:
+        frames, metadata = cameras.capture_with_metadata()
     target, width = leader.read()
     read_time = time.monotonic()
     validate_target(target)
@@ -96,12 +98,15 @@ def record_frame(bridge, cameras, leader, writer, *, critical=False,
     if require_alignment and abs(width - state["gripper_width"]) > .005:
         raise ValueError("align GELLO gripper to within 5 mm before takeover")
     stamp = time.monotonic()
-    validate_frames(frames, stamp)
+    if record:
+        validate_frames(frames, stamp)
     state_age = stamp - state["state_bridge_receive_s"]
     gripper_age = stamp - state["gripper_bridge_read_s"]
     if state_age > .05 or gripper_age > .5:
         raise RuntimeError("feedback expired during input collection")
     reply = bridge.command(state, target, width)
+    if not record:
+        return
     timing = {"state_bridge_receive_s": state["state_bridge_receive_s"],
               "state_client_receive_s": received,
               "gripper_bridge_read_s": state["gripper_bridge_read_s"],
@@ -126,6 +131,14 @@ class CollectionSession:
         self.bridge, self.cameras, self.leader = bridge, cameras, leader
         self.config, self.output, self.session = config, output, session
         self.mock = mock
+        self.fast_control = 'teleop_hz' in config
+        if self.fast_control:
+            from .control_timing import validate_rates
+            validate_rates(config)
+        self.record_period = 1 / config.get('control_hz', 15)
+        self.next_record_at = None
+        self.control_intervals = []
+        self.last_control_at = None
         self.robolab = config.get("teleop_controller")=="robolab_torque"
         if self.robolab != (state["calibration"].get("teleop_controller")=="robolab_torque"):
             raise ValueError("collector and bridge controller modes differ")
@@ -162,8 +175,26 @@ class CollectionSession:
     def _finish(self, outcome, reason="operator label"):
         if self.writer.count == 0:
             outcome, reason = "aborted", "empty trial"
+        if hasattr(self.writer, 'begin_finish') and not self.closed:
+            self.writer.begin_finish(outcome, reason)
+            self.saving_outcome = outcome
+            self.saving_started = time.monotonic()
+            self.phase = 'saving'
+            self.announce('saving', message='Arm held; waiting for recording storage.')
+            return
+        # A previously accepted human label remains authoritative if the user
+        # exits while it is draining. A still-recording episode is aborted.
+        if self.phase == 'saving':
+            outcome = self.saving_outcome
         path = self.writer.finish(outcome, reason)
+        self._saved(path, outcome)
+
+    def _saved(self, path, outcome):
         count = self.writer.count
+        if self.fast_control and self.control_intervals:
+            self.announce('control_timing', samples=len(self.control_intervals),
+                          interval_ms_p50_p95_p99=np.percentile(self.control_intervals, [50, 95, 99]).tolist(),
+                          recording_queue_peak=getattr(self.writer, 'high_watermark', 0))
         self.writer = None
         self.completed_episodes += 1
         self.phase = "standby"
@@ -192,10 +223,36 @@ class CollectionSession:
                 elif key == "i":
                     self.intervention = not self.intervention
                     self.announce("intervention", value=self.intervention)
+            now = time.monotonic()
+            record = True
+            if self.fast_control:
+                if hasattr(self.writer, 'check'):
+                    self.writer.check()
+                if self.last_control_at is not None:
+                    self.control_intervals.append(1000*(now-self.last_control_at))
+                    # Bounded diagnostic history, about 10 minutes at 100 Hz.
+                    if len(self.control_intervals) > 60000:
+                        del self.control_intervals[:10000]
+                self.last_control_at = now
+                if self.next_record_at is None:
+                    self.next_record_at = now
+                record = now + 1e-9 >= self.next_record_at
+                if record:
+                    missed = max(0, math.floor((now-self.next_record_at)/self.record_period))
+                    self.next_record_at += (missed+1)*self.record_period
             record_frame(self.bridge, self.cameras, self.leader, self.writer,
                          critical=self.critical, intervention=self.intervention,
-                         require_alignment=self.first_frame)
+                         require_alignment=self.first_frame, record=record,
+                         state=state if self.fast_control else None)
             self.first_frame = False
+            return True
+        if self.phase == 'saving':
+            self.bridge.hold(state)
+            path = self.writer.poll_finished()
+            if path is not None:
+                self._saved(path, self.saving_outcome)
+            elif time.monotonic() - self.saving_started > 5:
+                raise TimeoutError('episode storage failed to drain within 5 seconds')
             return True
         if self.phase == "homing":
             if "a" in keys:
@@ -297,7 +354,13 @@ class CollectionSession:
                               robot_width_mm=state["gripper_width"] * 1000)
                 self.last_alignment_display = time.monotonic()
             if "toggle" in keys and aligned:
-                self.writer = EpisodeWriter(self.output, mock=self.mock, task=self.config["task"],
+                writer_type = EpisodeWriter
+                if self.fast_control:
+                    from .async_episode import AsyncEpisodeWriter
+                    writer_type = AsyncEpisodeWriter
+                self.next_record_at = self.last_control_at = None
+                self.control_intervals = []
+                self.writer = writer_type(self.output, mock=self.mock, task=self.config["task"],
                     session=self.session, config={**self.config, "bridge_calibration": state["calibration"]})
                 self.critical = self.intervention = False
                 self.first_frame = not self.robolab

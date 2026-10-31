@@ -1,0 +1,391 @@
+{
+  "hardware_used": false,
+  "results": [
+    {
+      "mode": "baseline",
+      "commands": 90,
+      "frames": 90,
+      "command_interval_ms_p50_p95_p99": [
+        66.67557700166071,
+        67.40301179925154,
+        71.3372840797092
+      ],
+      "control_tick_ms_p50_p95_p99": [
+        44.909981999808224,
+        50.47223305091393,
+        71.2155691713815
+      ],
+      "recording_interval_ms_p50_p95_p99": [
+        66.67982500039216,
+        67.40221340005519,
+        71.33337191982719
+      ],
+      "timing_audit": {
+        "offline_resampling": true,
+        "timing_version": 2,
+        "interval_ms": {
+          "min": 57.10125900077401,
+          "p50": 66.67982500039216,
+          "p95": 67.40221340005519,
+          "p99": 71.33337191982719,
+          "max": 71.7604500005109
+        },
+        "max_grid_error_ms": 9.475028333812086,
+        "exposure_alignment_verified": false,
+        "cameras": {
+          "main": {
+            "host_receive_age_ms": {
+              "min": 0.31902299997454975,
+              "p50": 0.36372650083649205,
+              "p95": 0.5412684496150177,
+              "p99": 0.7820411803368186,
+              "max": 1.0926849990937626
+            },
+            "repeated_receive_timestamp_count": 0,
+            "source_clock": "synthetic_host_monotonic",
+            "repeated_frame_id_count": 0,
+            "missing_frame_id_count": 0
+          },
+          "wrist": {
+            "host_receive_age_ms": {
+              "min": 0.31902299997454975,
+              "p50": 0.36372650083649205,
+              "p95": 0.5412684496150177,
+              "p99": 0.7820411803368186,
+              "max": 1.0926849990937626
+            },
+            "repeated_receive_timestamp_count": 0,
+            "source_clock": "synthetic_host_monotonic",
+            "repeated_frame_id_count": 0,
+            "missing_frame_id_count": 0
+          }
+        },
+        "host_receive_skew_ms": {
+          "min": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "command_ack_round_trip_ms": {
+          "min": 0.32192199978453573,
+          "p50": 0.5202849997658632,
+          "p95": 0.7374143999186344,
+          "p99": 0.828951770436106,
+          "max": 0.8663380012876587
+        }
+      },
+      "events": [
+        [
+          "init",
+          {
+            "message": "F2/Enter: startup home; q/Ctrl-C: exit. Clear the home path first."
+          }
+        ],
+        [
+          "alignment",
+          {
+            "ready": false,
+            "detail": "align gripper to within 5 mm / wait for hold",
+            "robolab": true,
+            "joint_error_degrees": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "gripper_error_mm": -45.00000000000001,
+            "leader_joint_degrees": [
+              0.0,
+              0.0,
+              0.0,
+              -90.00021045914971,
+              0.0,
+              106.99986824068124,
+              0.0
+            ],
+            "robot_joint_degrees": [
+              0.0,
+              0.0,
+              0.0,
+              -90.00021045914971,
+              0.0,
+              106.99986824068124,
+              0.0
+            ],
+            "leader_width_mm": 40.0,
+            "robot_width_mm": 85.0
+          }
+        ],
+        [
+          "alignment",
+          {
+            "ready": true,
+            "detail": "",
+            "robolab": true,
+            "joint_error_degrees": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "gripper_error_mm": -45.00000000000001,
+            "leader_joint_degrees": [
+              0.0,
+              0.0,
+              0.0,
+              -90.00021045914971,
+              0.0,
+              106.99986824068124,
+              0.0
+            ],
+            "robot_joint_degrees": [
+              0.0,
+              0.0,
+              0.0,
+              -90.00021045914971,
+              0.0,
+              106.99986824068124,
+              0.0
+            ],
+            "leader_width_mm": 40.0,
+            "robot_width_mm": 85.0
+          }
+        ],
+        [
+          "recording",
+          {
+            "message": "F2/Enter: stop then label; s/f/a: stop with label."
+          }
+        ],
+        [
+          "settling",
+          {}
+        ],
+        [
+          "saved",
+          {
+            "episode": "/tmp/tmp5_lccoti/episode_1793440530112917114_a50b7f3d.h5",
+            "outcome": "failure",
+            "frames": 90
+          }
+        ],
+        [
+          "standby",
+          {
+            "message": "Align GELLO arm and gripper; F2/Enter starts the next trial."
+          }
+        ]
+      ],
+      "mock": true
+    },
+    {
+      "mode": "fast",
+      "commands": 600,
+      "frames": 90,
+      "command_interval_ms_p50_p95_p99": [
+        10.063581999929738,
+        11.00956490081444,
+        11.745785680541301
+      ],
+      "control_tick_ms_p50_p95_p99": [
+        1.3336994998098817,
+        3.246343250521022,
+        4.275663060943769
+      ],
+      "recording_interval_ms_p50_p95_p99": [
+        69.62054500036174,
+        70.37775699973281,
+        70.80927328010148
+      ],
+      "timing_audit": {
+        "offline_resampling": true,
+        "timing_version": 2,
+        "interval_ms": {
+          "min": 59.386173999882885,
+          "p50": 69.62054500036174,
+          "p95": 70.37775699973281,
+          "p99": 70.80927328010148,
+          "max": 71.08021999920311
+        },
+        "max_grid_error_ms": 7.265234999067616,
+        "exposure_alignment_verified": false,
+        "cameras": {
+          "main": {
+            "host_receive_age_ms": {
+              "min": 0.1684359995124396,
+              "p50": 0.27712500104826177,
+              "p95": 0.5016051998609328,
+              "p99": 1.3519513191204158,
+              "max": 2.9439940008160193
+            },
+            "repeated_receive_timestamp_count": 0,
+            "source_clock": "synthetic_host_monotonic",
+            "repeated_frame_id_count": 0,
+            "missing_frame_id_count": 0
+          },
+          "wrist": {
+            "host_receive_age_ms": {
+              "min": 0.1684359995124396,
+              "p50": 0.27712500104826177,
+              "p95": 0.5016051998609328,
+              "p99": 1.3519513191204158,
+              "max": 2.9439940008160193
+            },
+            "repeated_receive_timestamp_count": 0,
+            "source_clock": "synthetic_host_monotonic",
+            "repeated_frame_id_count": 0,
+            "missing_frame_id_count": 0
+          }
+        },
+        "host_receive_skew_ms": {
+          "min": 0.0,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0
+        },
+        "command_ack_round_trip_ms": {
+          "min": 0.11539099978108425,
+          "p50": 0.24783949993434362,
+          "p95": 0.5929971002842649,
+          "p99": 0.6514600706213967,
+          "max": 0.9811489999265177
+        }
+      },
+      "events": [
+        [
+          "init",
+          {
+            "message": "F2/Enter: startup home; q/Ctrl-C: exit. Clear the home path first."
+          }
+        ],
+        [
+          "alignment",
+          {
+            "ready": false,
+            "detail": "align gripper to within 5 mm / wait for hold",
+            "robolab": true,
+            "joint_error_degrees": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "gripper_error_mm": -45.00000000000001,
+            "leader_joint_degrees": [
+              0.0,
+              0.0,
+              0.0,
+              -90.00021045914971,
+              0.0,
+              106.99986824068124,
+              0.0
+            ],
+            "robot_joint_degrees": [
+              0.0,
+              0.0,
+              0.0,
+              -90.00021045914971,
+              0.0,
+              106.99986824068124,
+              0.0
+            ],
+            "leader_width_mm": 40.0,
+            "robot_width_mm": 85.0
+          }
+        ],
+        [
+          "alignment",
+          {
+            "ready": true,
+            "detail": "",
+            "robolab": true,
+            "joint_error_degrees": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "gripper_error_mm": -45.00000000000001,
+            "leader_joint_degrees": [
+              0.0,
+              0.0,
+              0.0,
+              -90.00021045914971,
+              0.0,
+              106.99986824068124,
+              0.0
+            ],
+            "robot_joint_degrees": [
+              0.0,
+              0.0,
+              0.0,
+              -90.00021045914971,
+              0.0,
+              106.99986824068124,
+              0.0
+            ],
+            "leader_width_mm": 40.0,
+            "robot_width_mm": 85.0
+          }
+        ],
+        [
+          "recording",
+          {
+            "message": "F2/Enter: stop then label; s/f/a: stop with label."
+          }
+        ],
+        [
+          "settling",
+          {}
+        ],
+        [
+          "saving",
+          {
+            "message": "Arm held; waiting for recording storage."
+          }
+        ],
+        [
+          "control_timing",
+          {
+            "samples": 599,
+            "interval_ms_p50_p95_p99": [
+              10.002707998864935,
+              11.108678500568205,
+              11.738964599353492
+            ],
+            "recording_queue_peak": 1
+          }
+        ],
+        [
+          "saved",
+          {
+            "episode": "/tmp/tmpmm_ym6v3/episode_1793440536831776415_98d45db7.h5",
+            "outcome": "failure",
+            "frames": 90
+          }
+        ],
+        [
+          "standby",
+          {
+            "message": "Align GELLO arm and gripper; F2/Enter starts the next trial."
+          }
+        ]
+      ],
+      "mock": true
+    }
+  ]
+}

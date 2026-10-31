@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "hardware_verified": true,
+  "task": "latency evaluation: not a training demonstration",
+  "control_hz": 15,
+  "socket": "/tmp/robolab-latency-trial.sock",
+  "gello_port": "/dev/serial/by-id/usb-FTDI_USB__-__Serial_Converter_FTBYPQ5E-if00-port0",
+  "arm_home": [
+    0.0,
+    -0.6283185307179586,
+    0.0,
+    -2.5132741228718345,
+    0.0,
+    1.8849555921538759,
+    0.0
+  ],
+  "gello_reference_joints_rad": [
+    0.0,
+    -0.6283185307179586,
+    0.0,
+    -2.5132741228718345,
+    0.0,
+    1.8849555921538759,
+    0.7853981633974483
+  ],
+  "cameras": {
+    "main_serial": "019337540647",
+    "wrist_serial": "262622272972",
+    "main_rotate_cw": true,
+    "main_crop_square": true
+  },
+  "teleop_controller": "robolab_torque",
+  "recording_action_source": "next_observed_joint_state",
+  "commissioning_trial": {
+    "d405_mounted": true,
+    "training_demonstration": false,
+    "candidate_requires_user_validation": true
+  },
+  "home_reference_velocity": 0.2,
+  "open_gripper_after_home": true,
+  "latency_profile": "fast",
+  "teleop_hz": 100,
+  "async_recording": true,
+  "gello_max_sample_age_s": 0.05
+}

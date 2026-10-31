@@ -64,6 +64,32 @@ int main() {
     try{late_callback.update(std::numeric_limits<double>::quiet_NaN());}catch(...){robolab_rejected=true;}
     require(robolab_rejected,"nonfinite callback interval must be rejected");
 
+    // A matched moving reference must not be damped toward zero velocity.
+    auto ff_fixture=fixture();ff_fixture["teleop_velocity_feedforward"]=1.;
+    const Config ff_cfg(ff_fixture);RobolabMotion ff(ff_cfg,Joints{});
+    ff.target(Joints{1,1,1,1,1,1,1});
+    for(int n=0;n<600;++n)ff.update();
+    ff.synchronize(ff.position(),ff.velocity());
+    for(double t:ff.torques())require(std::abs(t)<1e-10,"matched velocity reference is still damped toward zero");
+    ff.hold();ff.synchronize(ff.position(),Joints{});
+    for(double t:ff.torques())require(std::abs(t)<1e-10,"hold retained velocity feedforward");
+    ff.target(Joints{1,1,1,1,1,1,1},true);ff.update();
+    ff.synchronize(ff.position(),Joints{});
+    for(double t:ff.torques())require(std::abs(t)<1e-10,"home gained teleop feedforward");
+    for(double invalid:{-1.,1.01,std::numeric_limits<double>::quiet_NaN()}) {
+      auto bad=fixture();bad["teleop_velocity_feedforward"]=invalid;const Config c(bad);bool denied=false;
+      try{RobolabMotion m(c,Joints{});}catch(...){denied=true;}
+      require(denied,"invalid feedforward gain accepted");
+    }
+
+    RobolabMotion ramped(ff_cfg,Joints{});
+    ramped.target(Joints{1,1,1,1,1,1,1});ramped.update();
+    ramped.synchronize(ramped.position(),Joints{});
+    for(double t:ramped.torques())require(std::abs(t-.02)<1e-10,"feedforward startup not acceleration bounded");
+    for(size_t i=0;i<7;++i)require(ramped.position()[i]>0 && ramped.position()[i]<=ff_cfg.velocity[i]*.001+1e-12,"seven-axis update exceeded velocity limit");
+    ramped.stop();ramped.update();ramped.synchronize(ramped.position(),Joints{});
+    for(double t:ramped.torques())require(std::abs(t)<1e-10,"stop retained feedforward");
+
     auto fast_home_fixture=fixture();fast_home_fixture["home_max_velocity"]=.18;
     const Config fast_home_cfg(fast_home_fixture);
     RobolabMotion fast_home(fast_home_cfg,Joints{});

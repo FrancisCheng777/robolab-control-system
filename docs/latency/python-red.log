@@ -1,0 +1,22 @@
+{"event": "init", "message": "F2/Enter: startup home; q/Ctrl-C: exit. Clear the home path first."}
+FF.
+======================================================================
+FAIL: test_async_recording_required_for_fast_mode (test_low_latency.LowLatencyTests.test_async_recording_required_for_fast_mode)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/heinrich/robolab-control-system/tests/test_low_latency.py", line 81, in test_async_recording_required_for_fast_mode
+    with self.assertRaisesRegex(ValueError, 'async_recording'):
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_every_tick_updates_all_joints_but_records_at_15hz (test_low_latency.LowLatencyTests.test_every_tick_updates_all_joints_but_records_at_15hz)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/heinrich/robolab-control-system/tests/test_low_latency.py", line 68, in test_every_tick_updates_all_joints_but_records_at_15hz
+    self.assertEqual(session.writer.count, 2)
+AssertionError: 10 != 2
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.008s
+
+FAILED (failures=2)

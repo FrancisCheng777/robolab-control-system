@@ -1,5 +1,7 @@
 # robolab-control-system
 
+当前分支是延迟候选版：`codex/teleop-latency-trial`。原版仍在 `main` / `baseline-20261031`，未合并候选改动。试用配置、定位依据与测试结果见 [GELLO 延迟试用说明](docs/LATENCY_TRIAL.md)。
+
 2026-10-31 当前可用控制/数采代码基线。来自 4090 的 `/home/heinrich/pi05_plug_demo`，含当天实时调度修复及 Panda + Robotiq 2F-85 + D405 工具配置。源码与配置的逐文件 SHA256 见 `docs/baseline/source_manifest.json`；原 README 见 `docs/baseline/UPSTREAM_README.md`。
 
 `main` 与 `baseline-20261031` 保存原版本。候选改动仅放独立分支，真机测试后由使用者决定是否合入。此次归档未改变原运行目录或启动/停止硬件。
@@ -19,7 +21,7 @@
 ```sh
 cmake -S cpp/bridge -B build -DPI05_WITH_FRANKA=ON -DPI05_FETCH_DEPS=ON
 cmake --build build -j4
-ctest --test-dir build --output-on-failure
+(cd build && ctest --output-on-failure)
 ```
 
 以上构建与测试不启动真机。`scripts/try_one.sh` 是会操作真机的人工入口，勿作为自动化测试运行。
