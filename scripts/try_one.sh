@@ -27,21 +27,21 @@ export PYTHONUNBUFFERED=1
 exec > >(tee -a "$TRIAL_RUN/collection.log") 2>&1
 if [[ "$TRIAL_CONTINUOUS" == 1 ]]; then
   printf '%s\n' 'RoboLab 连续采集：不设录制时长和条数上限，由按键结束。' \
-    'Enter 启动设备 → Enter 初次回位 → Enter 开始跟随并录制。' \
+    '第一次 Enter：检测通信并自动回位、开爪；第二次 Enter：开始跟随并录制。' \
     'Enter 停止本条 → s 成功 / f 失败 / a 放弃；保存后待机，Enter 开始下一条。' \
     'q 或 Ctrl-C 退出整个采集；未标记的当前条保存为 aborted。' \
     '每条之间不自动回初始位。初始位、GELLO 映射及故障保护保持不变。' \
-    '现在尚未连接 Franka 控制。按 Enter 继续，输入 q 后 Enter 退出。'
+    '现在尚未连接 Franka 控制。请清空回位路径；按 Enter 将检查设备并自动回位，输入 q 后 Enter 退出。'
 elif [[ "${PI05_TELEOP_ONLY:-0}" == 1 ]]; then
   printf '%s\n' '仅遥操作试动：不启用 Kinect/D405、不生成训练数据。' \
     'Enter 启动设备 → Enter 回位 → Enter 开始跟随；再次 Enter 停止并结束本轮。' \
     'q 或 Ctrl-C 退出。现在尚未连接 Franka 控制，按 Enter 继续。'
 else
 printf '%s\n' 'RoboLab 单条试采：GELLO 大致与机器人同向即可，不要求七轴逐一对齐。' \
-  '准备好后 Enter 启动设备；看到准备完成再 Enter 回初始位，再 Enter 开始跟随并录制。' \
+  '第一次 Enter 检测通信并自动回初始位、开爪；待机后第二次 Enter 开始跟随并录制。' \
   '启动跟随后机器人会逐渐接近 GELLO。先做 10–15 秒小幅空中动作和夹爪开合。' \
   'Enter 停止，s=试动正常 / f=异常 / a=放弃；保存一条后自动检查和导出。' \
-  '现在尚未连接 Franka 控制。按 Enter 继续，输入 q 后 Enter 退出。'
+  '现在尚未连接 Franka 控制。请清空回位路径；按 Enter 将检查设备并自动回位，输入 q 后 Enter 退出。'
 fi
 read -r TRIAL_START
 [[ "$TRIAL_START" != q ]] || exit 0
@@ -137,16 +137,19 @@ if [[ "$TRIAL_CONTINUOUS" == 1 ]]; then
   TRIAL_EPISODE_ARGS=()
   TRIAL_COLLECTION_CONFIG="$TRIAL_RUN/collection.json"
   .venv/bin/python - "$TRIAL_COLLECTION_CONFIG" <<'PYCONFIG'
-import json, sys
+import json, os, sys
 from pathlib import Path
-config = json.loads(Path('reports/robolab_restore_20261030/collection.trial.json').read_text())
+source = Path(os.environ.get('PI05_TRIAL_CONFIG_DIR', 'reports/robolab_restore_20261030'))
+config = json.loads((source/'collection.trial.json').read_text())
 config['task'] = json.loads(Path('configs/collection.robolab.json').read_text())['task']
 Path(sys.argv[1]).write_text(json.dumps(config, indent=2) + '\n')
 PYCONFIG
 fi
+TRIAL_HOME_ARGS=()
+if [[ "${PI05_TELEOP_ONLY:-0}" != 1 ]]; then TRIAL_HOME_ARGS+=(--home-on-start); fi
 set +e
 taskset -c "${PI05_TRIAL_COLLECTION_CPUS:-0-11,13-19}" ./scripts/collect.sh --execute --config "$TRIAL_COLLECTION_CONFIG" \
-  --session "$TRIAL_SESSION" --output "$TRIAL_DATA" --guide "${TRIAL_EPISODE_ARGS[@]}" \
+  --session "$TRIAL_SESSION" --output "$TRIAL_DATA" --guide "${TRIAL_HOME_ARGS[@]}" "${TRIAL_EPISODE_ARGS[@]}" \
   --event-log "$TRIAL_RUN/events.jsonl"
 TRIAL_RESULT=$?
 set -e

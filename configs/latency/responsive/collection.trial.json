@@ -34,7 +34,7 @@
   "commissioning_trial": {
     "d405_mounted": true,
     "training_demonstration": false,
-    "candidate_requires_user_validation": true
+    "candidate_requires_user_validation": false
   },
   "home_reference_velocity": 0.2,
   "open_gripper_after_home": true,
@@ -63,5 +63,14 @@
     90
   ],
   "teleop_main_cpu": 13,
-  "teleop_gil_switch_interval_s": 0.001
+  "teleop_gil_switch_interval_s": 0.001,
+  "expected_collision_torque": [
+    20.0,
+    30.0,
+    30.0,
+    20.0,
+    18.0,
+    18.0,
+    18.0
+  ]
 }

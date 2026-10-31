@@ -1,0 +1,80 @@
+{
+  "mode": "CPU mock, no hardware connected",
+  "loaded_profiles": {
+    "responsive": {
+      "collision_torque": [
+        20.0,
+        30.0,
+        30.0,
+        20.0,
+        18.0,
+        18.0,
+        18.0
+      ],
+      "max_velocity": [
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "teleop_joint_kp": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        150,
+        90
+      ],
+      "teleop_velocity_feedforward": 1.0,
+      "home_max_velocity": 0.2
+    },
+    "responsive_recording": {
+      "collision_torque": [
+        20.0,
+        30.0,
+        30.0,
+        20.0,
+        18.0,
+        18.0,
+        18.0
+      ],
+      "max_velocity": [
+        0.3,
+        0.3,
+        0.3,
+        0.3,
+        0.4,
+        0.4,
+        0.4
+      ],
+      "teleop_joint_kp": [
+        120,
+        120,
+        120,
+        120,
+        120,
+        150,
+        90
+      ],
+      "teleop_velocity_feedforward": 1.0,
+      "home_max_velocity": 0.2
+    }
+  },
+  "identical_latest_pipeline_files": {
+    "pi05_demo/contract.py": "f7e266fc21b3c7f3b5084a1cbfe98b04e2bb0959e2f1c752001a4fb18eb9a7fa",
+    "pi05_demo/transport.py": "9d6990340480632c3c83c446c49894843dc63a25c824690ad4e5e653969d3144",
+    "pi05_demo/timing.py": "148108ef36abedec5d6cb320b642e710bb6b2198689ddae3bc6a14a0eab8104e",
+    "pi05_demo/episode.py": "23b7c3c41f8617ba5bc9ea98c93343ad221b228ec3515c20df356f210585f67f",
+    "pi05_demo/export.py": "4dce0ff9ca0583c70332c207ca231f9a4daddc3d189098eaa3cc7976445e4cfd",
+    "pi05_demo/export_actions.py": "18398121f8c01f46585471a36fe09a31cbb6b6c1146865498775ef288509441f",
+    "pi05_demo/cameras.py": "dc1eaf34009af5627d0c9d6bb353241d8264138da4b6afece8bb775c0327c1c1",
+    "pi05_demo/chunks.py": "77a9223fc6fd34a0c7465f4ee52c59d7421b2aa109630130215b7028229e7ea7",
+    "pi05_demo/teleop_reference.py": "8af58a90e56c1224ac95e90219c1e7ea90b8dc7e429a7615c8e22dfd0b13419b",
+    "configs/training_contract.json": "85127e7bd9255686a98e025c94f696e989632077b8525385b36fc26f10c9e9d0",
+    "vendor/legacy_cameras.py": "0a03fb031aeba7ab7ada950ab6f15efc92d4d88e91a523e1097c4365f4cd899f"
+  }
+}

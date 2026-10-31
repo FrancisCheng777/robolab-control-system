@@ -65,20 +65,24 @@ class Keys:
 
 class HomePath:
     """Rest-to-rest quintic reference; the bridge independently limits motion."""
-    def __init__(self, start, goal, now, *, max_velocity=.05):
+    def __init__(self, start, goal, now, *, max_velocity=.05, max_acceleration=.10, max_jerk=.5):
         self.start = vector(start, 7, "home start").copy()
         self.goal = vector(goal, 7, "home goal").copy()
         validate_target(self.start)
         validate_target(self.goal)
         self.delta = self.goal - self.start
         distance = float(np.max(np.abs(self.delta)))
-        if not np.isfinite(max_velocity) or not 0 < max_velocity <= .2:
-            raise ValueError("home reference velocity must be in (0, 0.2] rad/s")
-        # Configurable peak speed; retain 0.10 rad/s² and 0.5 rad/s³ bounds.
+        if not np.isfinite(max_velocity) or not 0 < max_velocity <= .7:
+            raise ValueError("home reference velocity must be in (0, 0.7] rad/s")
+        if not np.isfinite(max_acceleration) or not 0 < max_acceleration <= .8:
+            raise ValueError("home reference acceleration must be in (0, 0.8] rad/s²")
+        if not np.isfinite(max_jerk) or not 0 < max_jerk <= 3.:
+            raise ValueError("home reference jerk must be in (0, 3.0] rad/s³")
+        # Lengthen the trajectory as needed to satisfy all three reference bounds.
         # The RoboLab bridge independently caps each reference update.
         self.duration = max(1., 1.875 * distance / max_velocity,
-                            np.sqrt(5.774 * distance / .10),
-                            (60 * distance / .5) ** (1/3))
+                            np.sqrt(5.774 * distance / max_acceleration),
+                            (60 * distance / max_jerk) ** (1/3))
         self.started = self.last = float(now)
 
     def sample(self, now):
@@ -130,7 +134,7 @@ def record_frame(bridge, cameras, leader, writer, *, critical=False,
 
 class CollectionSession:
     def __init__(self, bridge, cameras, leader, config, output, session, *, mock,
-                 announce=None):
+                 announce=None, auto_home=False):
         state = bridge.state()
         if state.get("session_control_version") != 1:
             raise ValueError("rebuild the bridge: F2 session control is unavailable")
@@ -152,10 +156,14 @@ class CollectionSession:
         self.robolab = config.get("teleop_controller")=="robolab_torque"
         if self.robolab != (state["calibration"].get("teleop_controller")=="robolab_torque"):
             raise ValueError("collector and bridge controller modes differ")
+        if self.robolab and self.recording_enabled:
+            from .control_timing import validate_recording_speed
+            validate_recording_speed(state['calibration'], config.get('control_hz', 15))
         for expected, field in [('expected_teleop_velocity_feedforward', 'teleop_velocity_feedforward'),
                                 ('expected_reference_lead_limit_rad', 'teleop_reference_lead_limit_rad'),
                                 ('expected_max_velocity', 'max_velocity'),
-                                ('expected_teleop_joint_kp', 'teleop_joint_kp')]:
+                                ('expected_teleop_joint_kp', 'teleop_joint_kp'),
+                                ('expected_collision_torque', 'collision_torque')]:
             if expected in config and state['calibration'].get(field, 0.) != config[expected]:
                 raise ValueError(f'bridge profile mismatch: {field}')
         self.announce = announce or (lambda event, **data:
@@ -173,6 +181,8 @@ class CollectionSession:
         self.last_home_report = 0.
         self.closed = False
         self.completed_episodes = 0
+        self.auto_home_pending = auto_home
+        self.startup_wait_started = time.monotonic()
         bridge.claim()
         self.announce('control_profile', profile=config.get('latency_profile', 'unspecified'),
                       teleop_hz=config.get('teleop_hz', config.get('control_hz', 15)),
@@ -180,8 +190,11 @@ class CollectionSession:
                       reference_lead_limit_rad=state['calibration'].get('teleop_reference_lead_limit_rad', 0.),
                       max_velocity_rad_s=state['calibration'].get('max_velocity'),
                       teleop_joint_kp=state['calibration'].get('teleop_joint_kp', [120,120,120,120,120,150,60]),
+                      collision_torque_nm=state['calibration'].get('collision_torque'),
                       recording_enabled=self.recording_enabled)
-        self.announce("init", message="F2/Enter: startup home; q/Ctrl-C: exit. Clear the home path first.")
+        self.announce("init", auto_home=auto_home,
+                      message=("Startup confirmed: waiting for hold, then home; q/Ctrl-C: exit."
+                               if auto_home else "F2/Enter: startup home; q/Ctrl-C: exit. Clear the home path first."))
 
     @staticmethod
     def held(state):
@@ -355,12 +368,18 @@ class CollectionSession:
                     self.announce(self.phase, message=("s=success f=failure a=discard; arm is held."
                                   if self.phase == "label" else "Align GELLO; F2/Enter starts recording."))
         elif self.phase == "init":
-            if "toggle" in keys:
+            if self.auto_home_pending and time.monotonic() - self.startup_wait_started > 10:
+                raise RuntimeError("startup hold was not ready within 10 s")
+            if self.auto_home_pending or "toggle" in keys:
                 if not self.held(state):
-                    self.announce("waiting_for_hold", message="Wait for hold, then press F2/Enter again.")
+                    if not self.auto_home_pending:
+                        self.announce("waiting_for_hold", message="Wait for hold, then press F2/Enter again.")
                 else:
                     self.home = HomePath(state["q"], self.config["arm_home"], time.monotonic(),
-                                         max_velocity=self.config.get("home_reference_velocity", .05) if self.robolab else .05)
+                                         max_velocity=self.config.get("home_reference_velocity", .05) if self.robolab else .05,
+                                         max_acceleration=self.config.get("home_reference_acceleration", .10) if self.robolab else .10,
+                                         max_jerk=self.config.get("home_reference_jerk", .5) if self.robolab else .5)
+                    self.auto_home_pending = False
                     self.phase = "homing"
                     self.announce("homing", duration_s=self.home.duration, open_gripper=bool(self.config.get("open_gripper_after_home", False)))
         elif self.phase == "label":

@@ -1,5 +1,7 @@
 # Combined responsiveness trial — 2026-10-31
 
+> 历史试用记录：本文描述当时的候选状态。当前 main 的配置、阈值和数采兼容检查以 [发布检查](RELEASE_20261031.md) 为准。
+
 The operator reported that aperture opening/closing was satisfactory but wrist
 rotation still trailed GELLO. `responsive` combines the changes below in one
 candidate, without an ablation campaign. It is not yet validated on hardware.

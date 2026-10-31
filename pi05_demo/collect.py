@@ -69,6 +69,8 @@ def main():
     parser.add_argument("--event-log", help="JSONL events for the operator guide")
     parser.add_argument("--teleop-only", action="store_true", help="interactive control only; no cameras or datasets")
     parser.add_argument("--one-episode", action="store_true", help="exit after one labeled episode")
+    parser.add_argument("--home-on-start", action="store_true",
+                        help="home after device checks; launcher must obtain startup confirmation first")
     parser.add_argument("--frames", type=int, default=0, help="noninteractive mock length")
     parser.add_argument("--session", required=True, help="physical collection session; train/val split unit")
     parser.add_argument("--mock-outcome", choices=["success", "failure"], default="success")
@@ -86,6 +88,8 @@ def main():
         if not interactive or 'teleop_hz' not in config:
             parser.error('--teleop-only requires interactive mode and explicit teleop_hz')
         config['recording_enabled'] = False
+    if args.home_on_start and not interactive:
+        parser.error("--home-on-start requires an interactive session")
     if args.execute and (args.frames or not config["hardware_verified"]):
         parser.error("real collection needs hardware_verified=true and interactive outcome labels")
     if interactive and not sys.stdin.isatty():
@@ -127,8 +131,12 @@ def main():
                 guide = OperatorGuide(args.event_log)
                 guide('teleop_runtime', **runtime_settings)
             session = CollectionSession(bridge, cameras, leader, config, output,
-                                        args.session, mock=args.mock, announce=guide)
+                                        args.session, mock=args.mock, announce=guide,
+                                        auto_home=args.home_on_start)
             terminal = termios.tcgetattr(sys.stdin)
+            if args.home_on_start:
+                # Discard keys typed during device startup, never queue recording.
+                termios.tcflush(sys.stdin, termios.TCIFLUSH)
             tty.setcbreak(sys.stdin.fileno())
             keys = Keys()
             deadline = time.monotonic()

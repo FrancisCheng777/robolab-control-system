@@ -1,0 +1,186 @@
+{
+  "_comment": "Operator accepted responsive tracking feel; requested J2/J3 external-torque thresholds 30 Nm. Other collision thresholds unchanged. New contact threshold has not been physically re-tested. Recording variant caps wrist reference at 0.4 rad/s to fit the existing 15 Hz / 0.03 rad action contract. Actual measured motion still audited without clipping.",
+  "robot_model": "panda",
+  "action_contract_id": "panda_delta_q0.03_robotiq_width0.085_v1",
+  "joint_delta_scale": [
+    0.03,
+    0.03,
+    0.03,
+    0.03,
+    0.03,
+    0.03,
+    0.03
+  ],
+  "finger_range": [
+    0,
+    0.0425
+  ],
+  "joint_lower": [
+    -2.8973,
+    -1.7628,
+    -2.8973,
+    -3.0718,
+    -2.8973,
+    -0.0175,
+    -2.8973
+  ],
+  "joint_upper": [
+    2.8973,
+    1.7628,
+    2.8973,
+    -0.0698,
+    2.8973,
+    3.7525,
+    2.8973
+  ],
+  "max_velocity": [
+    0.3,
+    0.3,
+    0.3,
+    0.3,
+    0.4,
+    0.4,
+    0.4
+  ],
+  "max_acceleration": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "max_jerk": [
+    20.0,
+    20.0,
+    20.0,
+    20.0,
+    20.0,
+    20.0,
+    20.0
+  ],
+  "joint_impedance": [
+    600.0,
+    600.0,
+    600.0,
+    600.0,
+    250.0,
+    150.0,
+    50.0
+  ],
+  "max_tracking_error": [
+    0.05,
+    0.05,
+    0.05,
+    0.05,
+    0.05,
+    0.05,
+    0.05
+  ],
+  "collision_torque": [
+    20.0,
+    30.0,
+    30.0,
+    20.0,
+    18.0,
+    18.0,
+    18.0
+  ],
+  "collision_force": [
+    100.0,
+    100.0,
+    100.0,
+    15.0,
+    15.0,
+    15.0
+  ],
+  "load_mass": 0.0,
+  "load_center": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "load_inertia": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "command_timeout_s": 0.25,
+  "state_timeout_s": 0.05,
+  "max_state_sequence_lag": 50,
+  "gripper_max_width": 0.085,
+  "gripper_speed": 64,
+  "gripper_force": 64,
+  "gripper_grasp_epsilon_inner": 0.005,
+  "gripper_grasp_epsilon_outer": 0.005,
+  "gripper_command_deadband": 0.001,
+  "hardware_verified": true,
+  "gripper_type": "robotiq_2f85",
+  "gripper_device": "/dev/serial/by-id/usb-FTDI_USB_TO_RS-485_DAAL8Y3V-if00-port0",
+  "robotiq_open_position": 3,
+  "robotiq_closed_position": 227,
+  "expected_desk_tool": {
+    "id": "robotiq-2f85-d405-r2-reference",
+    "name": "Robotiq 2F-85 + D405 + R2 PETG (estimated reference)",
+    "color": "#3F51B5",
+    "mass": 1.0098550544536928,
+    "centerOfMass": [
+      0.0,
+      -0.005963192692566201,
+      0.060715106723257514
+    ],
+    "transformation": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.174,
+      1.0
+    ],
+    "inertia": [
+      0.0016574927175774829,
+      4.0708634797800805e-06,
+      1.0819434088880052e-07,
+      4.0708634797800805e-06,
+      0.0020676194844110466,
+      5.655140836009306e-05,
+      1.0819434088880052e-07,
+      5.655140836009306e-05,
+      0.0015629271379796583
+    ]
+  },
+  "teleop_controller": "robolab_torque",
+  "cmd_filter_alpha": 1.0,
+  "feedback_gap_policy": "original_robolab_torque_callbacks_with_libfranka_communication_protection",
+  "reference_tracking_policy": "original_robolab_torque_PD_without_position_backend_tracking_abort",
+  "home_max_velocity": 0.2,
+  "teleop_velocity_feedforward": 1.0,
+  "teleop_reference_lead_limit_rad": 0.0,
+  "latency_profile": "responsive_recording",
+  "teleop_joint_kp": [
+    120,
+    120,
+    120,
+    120,
+    120,
+    150,
+    90
+  ]
+}

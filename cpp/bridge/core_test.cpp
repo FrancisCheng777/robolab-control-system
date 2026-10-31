@@ -131,16 +131,21 @@ int main() {
       require(denied,"invalid reference lead limit accepted");
     }
 
-    auto fast_home_fixture=fixture();fast_home_fixture["home_max_velocity"]=.18;
+    auto fast_home_fixture=fixture();fast_home_fixture["home_max_velocity"]=.7;
+    fast_home_fixture["max_velocity"]=Joints{.7,.7,.7,.7,.7,.7,.7};
+    fast_home_fixture["teleop_max_velocity"]=.2;
     const Config fast_home_cfg(fast_home_fixture);
     RobolabMotion fast_home(fast_home_cfg,Joints{});
     fast_home.target(Joints{1,1,1,1,1,1,1},true);fast_home.update();
-    require(std::abs(fast_home.position()[0]-.00018)<1e-12,"configured home speed not applied");
+    require(std::abs(fast_home.position()[0]-.0007)<1e-12,"configured home speed not applied");
+    RobolabMotion unchanged_teleop(fast_home_cfg,Joints{});
+    unchanged_teleop.target(Joints{1,1,1,1,1,1,1});unchanged_teleop.update();
+    require(std::abs(unchanged_teleop.position()[0]-.0002)<1e-12,"faster home must not accelerate teleop");
     auto capped_fixture=fast_home_fixture;capped_fixture["max_velocity"]=Joints{.1,.1,.1,.1,.1,.1,.1};
     const Config capped_cfg(capped_fixture);RobolabMotion capped_home(capped_cfg,Joints{});
     capped_home.target(Joints{1,1,1,1,1,1,1},true);capped_home.update();
     require(std::abs(capped_home.position()[0]-.0001)<1e-12,"home must respect per-joint velocity ceiling");
-    for (double invalid : {0., -.1, .21, std::numeric_limits<double>::quiet_NaN()}) {
+    for (double invalid : {0., -.1, .71, std::numeric_limits<double>::quiet_NaN()}) {
       auto bad=fixture();bad["home_max_velocity"]=invalid;const Config bad_cfg(bad);bool rejected=false;
       try{RobolabMotion motion(bad_cfg,Joints{});}catch(...){rejected=true;}
       require(rejected,"invalid home speed was accepted");

@@ -1,0 +1,9 @@
+{
+  "original_source_files_checked": 177,
+  "original_source_changed": [],
+  "hardware_started_by_agent": false,
+  "gpu_training_started": false,
+  "python_suite_passed": 112,
+  "entrypoint_checks_passed": 3,
+  "ctest_passed": 2
+}

@@ -14,6 +14,18 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class FollowupProfileTests(unittest.TestCase):
+    def test_fast_wrist_recording_rejected_before_claim(self):
+        bridge = StubBridge()
+        state = bridge.state()
+        state['calibration'].update(max_velocity=[.3]*4+[.5]*3)
+        bridge.state = Mock(return_value=state)
+        bridge.claim = Mock()
+        config = dict(teleop_controller='robolab_torque', arm_home=state['q'],
+                      task='test', control_hz=15, teleop_hz=100, async_recording=True)
+        with self.assertRaisesRegex(ValueError, 'recording.*action contract'):
+            CollectionSession(bridge, None, Leader(), config, '.', 'test', mock=True)
+        bridge.claim.assert_not_called()
+
     def test_new_profiles_preserve_speed_and_collision_limits(self):
         source = json.loads((ROOT/'configs/latency/feedforward/bridge.trial.json').read_text())
         for name, lead in [('feedforward075', 0.), ('feedforward_guarded', .08)]:

@@ -89,7 +89,8 @@ class OperatorGuide:
             print("\033[2J\033[H" + color + format_alignment(data) + "\033[0m", flush=True)
             return
         messages = {
-            "init": "准备完成。按 Enter：Franka 低速回初始位；此时尚未录制。",
+            "init": ("设备准备完成，等待停止确认后自动回位并开爪；无需再按 Enter，尚未录制。q 可退出。"
+                     if data.get("auto_home") else "准备完成。按 Enter：Franka 回初始位；此时尚未录制。"),
             "homing": ("正在回初始位；到位后自动张开夹爪，再进入待机。此时尚未录制；q 可退出。"
                        if data.get("open_gripper") else "正在回初始位；夹爪保持当前开度。q 可退出。"),
             "opening_gripper": "机械臂已到位，正在自动张开夹爪；请等待完成。q 退出，a 取消。",

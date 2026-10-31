@@ -24,12 +24,14 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 @contextlib.contextmanager
-def mock_bridge(robolab=False, config_overrides=None):
+def mock_bridge(robolab=False, config_overrides=None, current_profile=False):
     socket = f"/tmp/pi05-f2-test-{uuid.uuid4().hex[:12]}.sock"
     with tempfile.TemporaryFile(mode="w+") as log, tempfile.TemporaryDirectory() as config_dir:
         config_path=ROOT / "configs/bridge.mock.json"
         if robolab:
             cfg=json.loads(config_path.read_text());cfg["teleop_controller"]="robolab_torque"
+            if current_profile:
+                cfg=json.loads((ROOT / "configs/bridge.robolab.mock.json").read_text())
             cfg.update(config_overrides or {})
             config_path=Path(config_dir)/"bridge.json";config_path.write_text(json.dumps(cfg))
         process = subprocess.Popen([
@@ -65,6 +67,32 @@ def mock_bridge(robolab=False, config_overrides=None):
 class CollectionSessionTests(unittest.TestCase):
     def config(self):
         return json.loads((ROOT / "configs/collection.json").read_text())
+
+    def test_current_profile_completes_one_radian_home_without_recording(self):
+        with mock_bridge(robolab=True, current_profile=True) as bridge, tempfile.TemporaryDirectory() as output:
+            cfg=json.loads((ROOT / "configs/collection.robolab.json").read_text())
+            goal=np.array(bridge.state()["q"])
+            goal[0]+=1.
+            cfg["arm_home"]=goal.tolist()
+            session=CollectionSession(bridge, None, None, cfg, output, "fast-home", mock=True,
+                                      auto_home=True, announce=lambda *a, **k:None)
+            peak_speed=0.
+            try:
+                deadline=time.monotonic()+6
+                while session.phase!="standby" and time.monotonic()<deadline:
+                    session.tick()
+                    state=bridge.state()
+                    peak_speed=max(peak_speed,float(np.max(np.abs(state["dq"]))))
+                    time.sleep(.02)
+                self.assertEqual(session.phase,"standby")
+                self.assertLess(session.home.duration,3.)
+                self.assertGreater(peak_speed,.35)
+                self.assertLessEqual(peak_speed,.700001)
+                np.testing.assert_allclose(state["q"],goal,atol=.005)
+                self.assertIsNone(session.writer)
+                self.assertFalse(list(Path(output).glob("*.h5")))
+            finally:
+                session.close()
 
     def test_startup_opens_initially_closed_gripper_after_home(self):
         # Exercise the real C++ command-mode gate, not a Python bridge stub.
@@ -181,9 +209,35 @@ class CollectionSessionTests(unittest.TestCase):
         self.assertLessEqual(np.max(np.abs(velocity)), .15001)
         self.assertLessEqual(np.max(np.abs(acceleration)), .10001)
         self.assertLessEqual(np.max(np.abs(jerk)), .5001)
-        for invalid in (0., -.1, float('nan'), .21):
+        for invalid in (0., -.1, float('nan'), .71):
             with self.assertRaises(ValueError):
                 HomePath(goal, goal, 0., max_velocity=invalid)
+
+    def test_quicker_home_has_bounded_velocity_acceleration_and_jerk(self):
+        goal = np.array(self.config()["arm_home"])
+        old = HomePath(goal + 1., goal, 0., max_velocity=.2)
+        fast = HomePath(goal + 1., goal, 0., max_velocity=.7, max_acceleration=.8, max_jerk=3.)
+        self.assertLess(fast.duration, 3.)
+        self.assertLess(fast.duration, old.duration * .3)
+        dt = .002
+        positions = np.array([fast.sample(float(t)) for t in np.arange(0., fast.duration, dt)])
+        velocity = np.diff(positions, axis=0) / dt
+        acceleration = np.diff(velocity, axis=0) / dt
+        jerk = np.diff(acceleration, axis=0) / dt
+        self.assertLessEqual(np.max(np.abs(velocity)), .70001)
+        self.assertLessEqual(np.max(np.abs(acceleration)), .80001)
+        self.assertLessEqual(np.max(np.abs(jerk)), 3.0001)
+        for invalid in (0., -.1, float('nan'), .81):
+            with self.assertRaises(ValueError):
+                HomePath(goal, goal, 0., max_acceleration=invalid)
+
+        for invalid in (0., -.1, float('nan'), 3.01):
+            with self.assertRaises(ValueError):
+                HomePath(goal, goal, 0., max_jerk=invalid)
+        distant = goal.copy()
+        distant[0] += 2.
+        long_path = HomePath(distant, goal, 0., max_velocity=.7, max_acceleration=.8, max_jerk=3.)
+        self.assertGreater(long_path.duration, 3.)  # Never force a long move into 3 seconds.
 
     def test_f2_homes_once_rechecks_alignment_and_excludes_idle_frames(self):
         class Leader:
@@ -301,7 +355,10 @@ class CollectionSessionTests(unittest.TestCase):
     def test_robolab_continuous_terminal_saves_two_episodes_then_q_exits(self):
         self.exercise_terminal(robolab=True, episodes=2)
 
-    def exercise_terminal(self, one_episode=False, robolab=False, episodes=1):
+    def test_confirmed_startup_homes_without_another_key_then_waits_to_record(self):
+        self.exercise_terminal(robolab=True, episodes=2, auto_home=True)
+
+    def exercise_terminal(self, one_episode=False, robolab=False, episodes=1, auto_home=False):
         with mock_bridge(robolab=robolab) as bridge, tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             config = self.config()
@@ -320,6 +377,7 @@ class CollectionSessionTests(unittest.TestCase):
                 "--config", str(path), "--socket", bridge.path, "--output", str(root / "data"),
                 "--session", "terminal_test",
                 *(["--one-episode"] if one_episode else []),
+                *(["--home-on-start"] if auto_home else []),
             ], cwd=ROOT, stdin=slave, stdout=slave, stderr=slave)
             os.close(slave)
             transcript = ""
@@ -338,9 +396,11 @@ class CollectionSessionTests(unittest.TestCase):
                         break
                 self.fail(transcript)
             try:
-                wait_for(lambda: '"event": "init"' in transcript and bridge.state()["hold_ready"])
-                os.write(master, b"\x1b[12~")
+                if not auto_home:
+                    wait_for(lambda: '"event": "init"' in transcript and bridge.state()["hold_ready"])
+                    os.write(master, b"\x1b[12~")
                 wait_for(lambda: '"event": "standby"' in transcript)
+                self.assertNotIn('"event": "recording"', transcript)
                 if robolab:
                     self.assertIn('"event": "opening_gripper"', transcript)
                     state = bridge.state()

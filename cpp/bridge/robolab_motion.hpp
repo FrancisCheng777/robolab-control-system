@@ -8,7 +8,7 @@ class RobolabMotion {
   Joints desired_, target_, filtered_, velocity_{}, measured_, dq_{}, kp_, kd_;
   bool held_{true}, stopping_{false}, home_{false};
   unsigned stop_cycles_{0};
-  double alpha_, home_velocity_, velocity_ff_, lead_limit_;
+  double alpha_, home_velocity_, velocity_ff_, lead_limit_, teleop_velocity_;
   Joints ff_velocity_{}, teleop_kp_;
  public:
   RobolabMotion(const Config& cfg, const Joints& q):cfg_(cfg),desired_(q),target_(q),filtered_(q),measured_(q),
@@ -23,9 +23,12 @@ class RobolabMotion {
     lead_limit_=cfg.raw.value("teleop_reference_lead_limit_rad",0.);
     if(!std::isfinite(lead_limit_) || lead_limit_<0 || lead_limit_>.2)
       throw std::invalid_argument("teleop_reference_lead_limit_rad must be in [0, 0.2]");
+    teleop_velocity_=cfg.raw.value("teleop_max_velocity",.5);
     cfg.check_position(q);
-    if(!std::isfinite(home_velocity_) || home_velocity_<=0 || home_velocity_>.2)
-      throw std::invalid_argument("home_max_velocity must be in (0, 0.2] rad/s");
+    if(!std::isfinite(home_velocity_) || home_velocity_<=0 || home_velocity_>.7)
+      throw std::invalid_argument("home_max_velocity must be in (0, 0.7] rad/s");
+    if(!std::isfinite(teleop_velocity_) || teleop_velocity_<=0 || teleop_velocity_>.5)
+      throw std::invalid_argument("teleop_max_velocity must be in (0, 0.5] rad/s");
     if(!std::isfinite(alpha_) || alpha_<=0 || alpha_>1) throw std::invalid_argument("invalid command filter alpha");
   }
   void synchronize(const Joints& q,const Joints& dq) { measured_=q;dq_=dq; }
@@ -49,7 +52,7 @@ class RobolabMotion {
     velocity_.fill(0);
     if(!held_&&!stopping_)for(size_t i=0;i<7;++i){
       filtered_[i]=alpha_*target_[i]+(1-alpha_)*filtered_[i];
-      const double step=std::min(home_?home_velocity_:.5,cfg_.velocity[i])*.001;
+      const double step=std::min(home_?home_velocity_:teleop_velocity_,cfg_.velocity[i])*.001;
       // An obstructed follower must not keep building a remote position target.
       // Bound the pursuit target, not the current reference: retain one-cycle
       // slew limits even if measured position moves outside the previous band.

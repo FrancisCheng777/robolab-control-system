@@ -1,5 +1,5 @@
 {
-  "_comment": "Operator-requested combined responsiveness trial. Reference speed J1-J4=0.3, J5-J7=0.5 rad/s; FF=1.0; J7 tracking Kp=90. Home gains/speed and collision thresholds unchanged. Requires physical operator validation.",
+  "_comment": "Operator accepted responsive tracking feel; requested J2/J3 external-torque thresholds 30 Nm. Other collision thresholds unchanged. New contact threshold has not been physically re-tested.",
   "robot_model": "panda",
   "action_contract_id": "panda_delta_q0.03_robotiq_width0.085_v1",
   "joint_delta_scale": [
@@ -80,8 +80,8 @@
   ],
   "collision_torque": [
     20.0,
-    22.0,
-    20.0,
+    30.0,
+    30.0,
     20.0,
     18.0,
     18.0,

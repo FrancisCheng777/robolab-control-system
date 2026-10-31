@@ -31,6 +31,8 @@
   },
   "teleop_controller": "robolab_torque",
   "recording_action_source": "next_observed_joint_state",
-  "home_reference_velocity": 0.2,
-  "open_gripper_after_home": true
+  "home_reference_velocity": 0.7,
+  "open_gripper_after_home": true,
+  "home_reference_acceleration": 0.8,
+  "home_reference_jerk": 3.0
 }

@@ -1,0 +1,35 @@
+{
+  "source_root": "/home/heinrich/pi05_plug_demo",
+  "mock": true,
+  "gpu_training": false,
+  "splits": {
+    "train": {
+      "rows": 44,
+      "complete_windows": 35,
+      "action_abs_max": 0.8888959884643555,
+      "chunk_shape": [
+        10,
+        8
+      ],
+      "stage1_shape": [
+        10,
+        32
+      ],
+      "mock_rejected_by_default": true
+    },
+    "validation": {
+      "rows": 44,
+      "complete_windows": 35,
+      "action_abs_max": 0.8888959884643555,
+      "chunk_shape": [
+        10,
+        8
+      ],
+      "stage1_shape": [
+        10,
+        32
+      ],
+      "mock_rejected_by_default": true
+    }
+  }
+}
