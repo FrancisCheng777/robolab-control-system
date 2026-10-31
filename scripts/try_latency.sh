@@ -3,7 +3,7 @@ set -euo pipefail
 LATENCY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LATENCY_PROFILE="${1:-fast}"
 LATENCY_MODE="${2:---inspect}"
-case "$LATENCY_PROFILE" in baseline|fast|feedforward|feedforward075|feedforward_guarded) ;; *) echo 'profile: baseline | fast | feedforward | feedforward075 | feedforward_guarded'; exit 2;; esac
+case "$LATENCY_PROFILE" in baseline|fast|feedforward|feedforward075|feedforward_guarded|feedforward075_j2_22) ;; *) echo 'profile: baseline | fast | feedforward | feedforward075 | feedforward_guarded | feedforward075_j2_22'; exit 2;; esac
 case "$LATENCY_MODE" in --inspect|--execute) ;; *) echo 'mode: --inspect | --execute'; exit 2;; esac
 [[ $# -le 3 ]] || exit 2
 case "${3:-}" in
