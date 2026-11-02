@@ -43,3 +43,5 @@ cmake --build build -j4
 ```
 
 以上构建与测试不启动真机。`scripts/try_one.sh` 是会操作真机的人工入口，勿作为自动化测试运行。
+
+策略推理如果使用相邻实测关节位移标签，可显式使用 [有界参考适配器](docs/POLICY_REFERENCE.md)。该接口不改变 GELLO 绝对目标数采路径，也不提高速度、PD 增益或碰撞阈值。
