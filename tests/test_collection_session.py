@@ -389,6 +389,8 @@ class CollectionSessionTests(unittest.TestCase):
                         try:
                             transcript += os.read(master, 65536).decode(errors="replace")
                         except OSError:
+                            if predicate():
+                                return
                             break
                     if predicate():
                         return
@@ -426,7 +428,9 @@ class CollectionSessionTests(unittest.TestCase):
                 if not one_episode:
                     self.assertIsNone(process.poll(), transcript)
                     os.write(master, b"q")
-                self.assertEqual(process.wait(timeout=5), 0, transcript)
+                # Drain PTY output while the child restores terminal settings.
+                wait_for(lambda: process.poll() is not None)
+                self.assertEqual(process.returncode, 0, transcript)
                 files = list((root / "data").glob("*.h5"))
                 self.assertEqual(len(files), episodes)
                 info = inspect_episode(files[0], allow_mock=True)
