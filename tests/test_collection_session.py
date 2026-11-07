@@ -389,9 +389,8 @@ class CollectionSessionTests(unittest.TestCase):
                         try:
                             transcript += os.read(master, 65536).decode(errors="replace")
                         except OSError:
-                            if predicate():
-                                return
-                            break
+                            # PTY EOF can precede waitpid observing child exit.
+                            time.sleep(.005)
                     if predicate():
                         return
                     if process.poll() is not None:
