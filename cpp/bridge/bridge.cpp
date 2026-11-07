@@ -17,6 +17,9 @@
 #include <sys/un.h>
 #include <thread>
 #include <unistd.h>
+#ifdef __APPLE__
+#include <mach/mach_time.h>
+#endif
 #ifdef PI05_WITH_FRANKA
 #include <franka/robot.h>
 #include <franka/exception.h>
@@ -31,7 +34,20 @@ using namespace pi05;
 namespace {
 volatile std::sig_atomic_t interrupted = 0;
 void on_signal(int) { interrupted = 1; }
-double now_s() { return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count(); }
+double now_s() {
+#ifdef __APPLE__
+  // Python time.monotonic() uses mach_absolute_time. libc++ steady_clock
+  // includes suspended time on macOS and therefore has a different epoch.
+  static const mach_timebase_info_data_t scale = [] {
+    mach_timebase_info_data_t value;
+    mach_timebase_info(&value);
+    return value;
+  }();
+  return static_cast<double>(mach_absolute_time()) * scale.numer / scale.denom / 1e9;
+#else
+  return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
+#endif
+}
 struct Shared {
   SpscQueue<Command, 8> commands;
   SpscQueue<State, 4096> states;

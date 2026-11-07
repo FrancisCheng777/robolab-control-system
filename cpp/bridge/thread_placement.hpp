@@ -2,8 +2,10 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#ifdef __linux__
 #include <pthread.h>
 #include <sched.h>
+#endif
 #include <stdexcept>
 #include <string>
 
@@ -12,6 +14,7 @@
 inline int pin_control_thread_from_env() {
   const char* value = std::getenv("PI05_CONTROL_CPU");
   if (!value) return -1;
+#ifdef __linux__
   char* end = nullptr;
   errno = 0;
   const long cpu = std::strtol(value, &end, 10);
@@ -23,4 +26,7 @@ inline int pin_control_thread_from_env() {
   const int result = pthread_setaffinity_np(pthread_self(), sizeof(mask), &mask);
   if (result) throw std::runtime_error(std::string("control CPU affinity: ") + std::strerror(result));
   return static_cast<int>(cpu);
+#else
+  throw std::runtime_error("PI05_CONTROL_CPU affinity requires Linux");
+#endif
 }
